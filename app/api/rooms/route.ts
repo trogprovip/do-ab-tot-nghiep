@@ -4,26 +4,75 @@ import { prisma } from '@/lib/prisma';
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const cinemaId = searchParams.get('cinemaId');
+    const page = parseInt(searchParams.get('page') || '0');
+    const size = parseInt(searchParams.get('size') || '10');
+    const search = searchParams.get('search') || '';
+    const cinema_id = searchParams.get('cinema_id');
+    const status = searchParams.get('status');
 
-    const where: any = {
+    const skip = page * size;
+
+    const where: {
+      is_deleted: boolean;
+      cinema_id?: number;
+      status?: 'active' | 'inactive';
+      OR?: Array<{
+        room_name?: { contains: string };
+        room_type?: { contains: string };
+      }>;
+    } = {
       is_deleted: false,
     };
 
-    if (cinemaId) {
-      where.cinema_id = parseInt(cinemaId);
+    if (cinema_id) {
+      where.cinema_id = parseInt(cinema_id);
     }
 
-    const rooms = await prisma.rooms.findMany({
-      where,
-      orderBy: { id: 'desc' },
-    });
+    if (status) {
+      where.status = status as 'active' | 'inactive';
+    }
 
-    return NextResponse.json(rooms);
+    if (search) {
+      where.OR = [
+        { room_name: { contains: search } },
+        { room_type: { contains: search } },
+      ];
+    }
+
+    const [rooms, total] = await Promise.all([
+      prisma.rooms.findMany({
+        where,
+        include: {
+          cinemas: {
+            select: {
+              id: true,
+              cinema_name: true,
+              provinces: {
+                select: {
+                  province_name: true,
+                },
+              },
+            },
+          },
+        },
+        orderBy: { id: 'desc' },
+        skip,
+        take: size,
+      }),
+      prisma.rooms.count({ where }),
+    ]);
+
+    return NextResponse.json({
+      content: rooms,
+      totalElements: total,
+      totalPages: Math.ceil(total / size),
+      size,
+      number: page,
+    });
   } catch (error) {
     console.error('Error fetching rooms:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to fetch rooms' },
+      { error: 'Failed to fetch rooms' },
       { status: 500 }
     );
   }
@@ -33,11 +82,18 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
+    if (!body.cinema_id || !body.room_name || !body.total_seats) {
+      return NextResponse.json(
+        { error: 'Missing required fields' },
+        { status: 400 }
+      );
+    }
+
     const newRoom = await prisma.rooms.create({
       data: {
         cinema_id: parseInt(body.cinema_id),
         room_name: body.room_name,
-        room_type: body.room_type,
+        room_type: body.room_type || null,
         total_seats: parseInt(body.total_seats),
         status: body.status || 'active',
         is_deleted: false,
@@ -48,7 +104,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Error creating room:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to create room' },
+      { error: 'Failed to create room' },
       { status: 500 }
     );
   }

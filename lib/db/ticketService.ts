@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { prisma } from '../prisma';
 import { tickets, tickets_status, tickets_payment_status } from '@prisma/client';
 

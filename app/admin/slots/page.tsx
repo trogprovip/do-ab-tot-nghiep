@@ -3,9 +3,13 @@
 import React, { useState, useEffect } from 'react';
 import DataTable from '@/components/DataTable';
 import { Plus, Search } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { slotService, Slot } from '@/lib/services/slotService';
 
 export default function SlotsPage() {
-  const [slots, setSlots] = useState([]);
+  const router = useRouter();
+  const [slots, setSlots] = useState<Slot[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -16,19 +20,35 @@ export default function SlotsPage() {
   const fetchSlots = async () => {
     try {
       setLoading(true);
-      const params = new URLSearchParams({
-        page: '0',
-        size: '100',
-        ...(searchTerm && { search: searchTerm }),
+      const response = await slotService.getSlots({
+        page: 0,
+        size: 100,
+        search: searchTerm || undefined,
       });
-      
-      const response = await fetch(`/api/slots?${params}`);
-      const data = await response.json();
-      setSlots(data.content || []);
+      setSlots(response.content);
     } catch (error) {
       console.error('Error fetching slots:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleEdit = (row: Slot) => {
+    router.push(`/admin/slots/edit/${row.id}`);
+  };
+
+  const handleDelete = async (row: Slot) => {
+    if (!confirm('Bạn có chắc chắn muốn xóa suất chiếu này?')) {
+      return;
+    }
+
+    try {
+      await slotService.deleteSlot(row.id);
+      alert('Xóa suất chiếu thành công!');
+      fetchSlots();
+    } catch (error) {
+      console.error('Error deleting slot:', error);
+      alert('Có lỗi xảy ra khi xóa suất chiếu!');
     }
   };
 
@@ -37,22 +57,32 @@ export default function SlotsPage() {
     { 
       key: 'movies', 
       label: 'Phim',
-      render: (value: { title: string }) => value?.title || '-'
+      render: (value: Slot['movies']) => value?.title || '-'
     },
     { 
       key: 'rooms', 
-      label: 'Phòng',
-      render: (value: { room_name: string }) => value?.room_name || '-'
+      label: 'Phòng chiếu',
+      render: (value: Slot['rooms']) => {
+        if (!value) return '-';
+        return (
+          <div>
+            <div className="font-medium">{value.room_name}</div>
+            {value.cinemas && (
+              <div className="text-xs text-gray-500">{value.cinemas.cinema_name}</div>
+            )}
+          </div>
+        );
+      }
     },
     { 
       key: 'show_time', 
       label: 'Giờ chiếu',
-      render: (value: string) => value ? new Date(value).toLocaleString('vi-VN') : '-'
+      render: (value: string) => new Date(value).toLocaleString('vi-VN')
     },
     { 
       key: 'price', 
       label: 'Giá vé',
-      render: (value: number) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value)
+      render: (value: number) => `${value.toLocaleString('vi-VN')} đ`
     },
     { key: 'empty_seats', label: 'Ghế trống' },
   ];
@@ -61,10 +91,12 @@ export default function SlotsPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold text-gray-900">Quản lý Suất chiếu</h1>
-        <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-          <Plus className="w-4 h-4" />
-          Thêm suất chiếu
-        </button>
+        <Link href="/admin/slots/create">
+          <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+            <Plus className="w-4 h-4" />
+            Thêm suất chiếu
+          </button>
+        </Link>
       </div>
 
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
@@ -88,6 +120,8 @@ export default function SlotsPage() {
         <DataTable
           columns={columns}
           data={slots}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
         />
       )}
     </div>

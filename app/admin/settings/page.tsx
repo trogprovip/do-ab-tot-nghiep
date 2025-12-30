@@ -61,11 +61,11 @@ export default function SettingsPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Cài đặt hệ thống</h1>
+        <h1 className="text-3xl font-bold text-gray-900">Giá vé</h1>
       </div>
 
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-6">Cài đặt giá vé</h2>
+        <h2 className="text-xl font-semibold text-gray-900 mb-6">Tùy chỉnh giá vé</h2>
         
         <div className="space-y-6">
           <div>
@@ -98,7 +98,7 @@ export default function SettingsPage() {
               className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
               <Save className="w-4 h-4" />
-              Lưu cài đặt
+              Lưu giá vé
             </button>
           </div>
         </div>

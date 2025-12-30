@@ -58,6 +58,7 @@ export async function PUT(
       );
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const updateData: any = {};
     if (body.province_name !== undefined) {
       updateData.province_name = body.province_name;

@@ -1,6 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from 'axios';
 
 export interface Movie {
+  age_rating: any;
+  rating: any;
   id: number;
   title: string;
   description: string | null;

@@ -65,8 +65,9 @@ export default function MovieSelection() {
 
         {/* Loading State */}
         {loading && (
-          <div className="flex justify-center items-center py-20">
-            <Spin size="large" tip={<span className="text-gray-600 mt-4 block font-bold">Đang tải phim...</span>} />
+          <div className="flex flex-col justify-center items-center py-20 gap-4">
+            <Spin size="large" />
+            <span className="text-gray-600 font-bold">Đang tải phim...</span>
           </div>
         )}
 

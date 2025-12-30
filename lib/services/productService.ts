@@ -1,51 +1,70 @@
-import { apiClient } from '../api-client';
-import { API_ENDPOINTS } from '../api-config';
+import axios from 'axios';
 
-export interface PaginatedResponse<T> {
-  content: T[];
+const baseUrl = '/api/products';
+
+export interface Product {
+  id: number;
+  product_name: string;
+  category: 'food' | 'drink' | 'combo' | 'voucher';
+  description: string | null;
+  price: number;
+  image_url: string | null;
+  create_at: string | null;
+  is_deleted: boolean;
+}
+
+export interface CreateProductForm {
+  product_name: string;
+  category: 'food' | 'drink' | 'combo' | 'voucher';
+  description?: string;
+  price: number;
+  image_url?: string;
+}
+
+export interface UpdateProductForm {
+  product_name?: string;
+  category?: 'food' | 'drink' | 'combo' | 'voucher';
+  description?: string;
+  price?: number;
+  image_url?: string;
+}
+
+export interface ProductPage {
+  content: Product[];
   totalElements: number;
   totalPages: number;
   size: number;
   number: number;
 }
 
-export interface Product {
-  id: number;
-  product_name: string;
-  category: 'food' | 'drink' | 'combo' | 'voucher';
-  description?: string;
-  price: number;
-  image_url?: string;
-  create_at?: string;
-  is_deleted?: boolean;
-}
-
-export interface ProductQueryParams {
+export interface GetProductsParams {
   page?: number;
   size?: number;
   search?: string;
-  category?: string;
-  [key: string]: string | number | boolean | undefined;
+  category?: 'food' | 'drink' | 'combo' | 'voucher';
 }
 
 export const productService = {
-  getAll: async (params: ProductQueryParams = {}): Promise<PaginatedResponse<Product>> => {
-    return apiClient.get<PaginatedResponse<Product>>(API_ENDPOINTS.PRODUCTS, params);
+  getProducts: async (params: GetProductsParams = {}): Promise<ProductPage> => {
+    const response = await axios.get(baseUrl, { params });
+    return response.data;
   },
 
-  getById: async (id: number): Promise<Product> => {
-    return apiClient.get<Product>(API_ENDPOINTS.PRODUCT_BY_ID(id));
+  getProductById: async (id: number): Promise<Product> => {
+    const response = await axios.get(`${baseUrl}/${id}`);
+    return response.data;
   },
 
-  create: async (data: Partial<Product>): Promise<Product> => {
-    return apiClient.post<Product>(API_ENDPOINTS.PRODUCTS, data);
+  createProduct: async (data: CreateProductForm): Promise<Product> => {
+    const response = await axios.post(baseUrl, data);
+    return response.data;
   },
 
-  update: async (id: number, data: Partial<Product>): Promise<Product> => {
-    return apiClient.put<Product>(API_ENDPOINTS.PRODUCT_BY_ID(id), data);
+  updateProduct: async (id: number, data: UpdateProductForm): Promise<void> => {
+    await axios.put(`${baseUrl}/${id}`, data);
   },
 
-  delete: async (id: number): Promise<void> => {
-    return apiClient.delete<void>(API_ENDPOINTS.PRODUCT_BY_ID(id));
+  deleteProduct: async (id: number): Promise<void> => {
+    await axios.delete(`${baseUrl}/${id}`);
   },
 };

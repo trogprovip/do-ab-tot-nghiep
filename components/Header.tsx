@@ -1,10 +1,31 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Search, Mail, Bell, ChevronDown, Menu } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Search, Mail, Bell, ChevronDown, Menu, LogOut } from 'lucide-react';
+import { authService, User } from '@/lib/services/authService';
+import Link from 'next/link';
 
 export default function Header() {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [showDropdown, setShowDropdown] = useState(false);
+
+  useEffect(() => {
+    const user = authService.getCurrentUser();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setCurrentUser(user);
+  }, []);
+
+  const handleLogout = () => {
+    if (confirm('Bạn có chắc chắn muốn đăng xuất?')) {
+      authService.logout();
+      setCurrentUser(null);
+      setShowDropdown(false);
+      setTimeout(() => {
+        window.location.replace('/admin/login');
+      }, 100);
+    }
+  };
 
   return (
     <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-gray-100 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07)] px-6 py-4 transition-all duration-300">
@@ -62,13 +83,27 @@ export default function Header() {
           </button>
 
           {/* User Profile */}
-          <div className="flex items-center gap-3 pl-2 md:pl-6 border-l border-gray-200 cursor-pointer group">
-            <div className="text-right hidden md:block">
-              <p className="text-xs text-gray-400 font-medium mb-0.5 group-hover:text-red-500 transition-colors">Xin chào,</p>
-              <p className="text-sm font-bold text-gray-800 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-red-600 group-hover:to-orange-500 transition-all">
-                Anh Trongdz123
-              </p>
-            </div>
+          <div className="relative">
+            <div 
+              className="flex items-center gap-3 pl-2 md:pl-6 border-l border-gray-200 cursor-pointer group"
+              onClick={() => setShowDropdown(!showDropdown)}
+            >
+              <div className="text-right hidden md:block">
+                {currentUser ? (
+                  <>
+                    <p className="text-xs text-gray-400 font-medium mb-0.5 group-hover:text-red-500 transition-colors">Xin chào,</p>
+                    <p className="text-sm font-bold text-gray-800 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-red-600 group-hover:to-orange-500 transition-all">
+                      {currentUser.full_name}
+                    </p>
+                  </>
+                ) : (
+                  <Link href="/admin/login">
+                    <p className="text-sm font-bold text-gray-800 hover:text-red-600 transition-colors">
+                      Đăng Nhập
+                    </p>
+                  </Link>
+                )}
+              </div>
             
             <div className="relative">
                 {/* Avatar Ring */}
@@ -83,7 +118,28 @@ export default function Header() {
                 </div>
             </div>
             
-            <ChevronDown className="w-4 h-4 text-gray-400 group-hover:text-gray-600 transition-transform group-hover:rotate-180 hidden sm:block" />
+              <ChevronDown className="w-4 h-4 text-gray-400 group-hover:text-gray-600 transition-transform group-hover:rotate-180 hidden sm:block" />
+            </div>
+
+            {/* Dropdown Menu */}
+            {showDropdown && currentUser && (
+              <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-gray-100 py-2 z-50">
+                <div className="px-4 py-3 border-b border-gray-100">
+                  <p className="text-sm font-bold text-gray-800">{currentUser.full_name}</p>
+                  <p className="text-xs text-gray-500 mt-1">{currentUser.email}</p>
+                  <span className="inline-block mt-2 px-2 py-1 bg-red-100 text-red-600 text-xs font-bold rounded">
+                    {currentUser.role === 'admin' ? 'ADMIN' : 'USER'}
+                  </span>
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Đăng xuất
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>

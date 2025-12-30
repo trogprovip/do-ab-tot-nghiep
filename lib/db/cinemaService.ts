@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { prisma } from '../prisma';
 import { cinemas, cinemas_status } from '@prisma/client';
 

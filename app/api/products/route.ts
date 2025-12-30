@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
@@ -8,42 +7,47 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '0');
     const size = parseInt(searchParams.get('size') || '10');
     const search = searchParams.get('search') || '';
-    const category = searchParams.get('category') || '';
+    const category = searchParams.get('category');
 
     const skip = page * size;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const where: any = {
       is_deleted: false,
     };
-
-    if (search) {
-      where.product_name = { contains: search };
-    }
 
     if (category) {
       where.category = category;
     }
 
-    const totalElements = await prisma.products.count({ where });
+    if (search) {
+      where.OR = [
+        { product_name: { contains: search } },
+        { description: { contains: search } },
+      ];
+    }
 
-    const content = await prisma.products.findMany({
-      where,
-      skip,
-      take: size,
-      orderBy: { id: 'desc' },
-    });
+    const [products, total] = await Promise.all([
+      prisma.products.findMany({
+        where,
+        orderBy: { id: 'desc' },
+        skip,
+        take: size,
+      }),
+      prisma.products.count({ where }),
+    ]);
 
     return NextResponse.json({
-      content,
-      totalElements,
-      totalPages: Math.ceil(totalElements / size),
+      content: products,
+      totalElements: total,
+      totalPages: Math.ceil(total / size),
       size,
       number: page,
     });
   } catch (error) {
     console.error('Error fetching products:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to fetch products' },
+      { error: 'Failed to fetch products' },
       { status: 500 }
     );
   }
@@ -53,13 +57,20 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
+    if (!body.product_name || !body.category || !body.price) {
+      return NextResponse.json(
+        { error: 'Missing required fields' },
+        { status: 400 }
+      );
+    }
+
     const newProduct = await prisma.products.create({
       data: {
         product_name: body.product_name,
         category: body.category,
-        description: body.description,
+        description: body.description || null,
         price: parseFloat(body.price),
-        image_url: body.image_url,
+        image_url: body.image_url || null,
         create_at: new Date(),
         is_deleted: false,
       },
@@ -69,7 +80,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Error creating product:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to create product' },
+      { error: 'Failed to create product' },
       { status: 500 }
     );
   }

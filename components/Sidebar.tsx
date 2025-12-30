@@ -14,11 +14,11 @@ import {
   MapPin,
   DoorOpen,
   Clock,
-  Settings,
-  LogOut,
-  ChevronRight
+  ChevronRight,
+  Tag,
+  Armchair,
+  Sofa
 } from 'lucide-react';
-
 // Phân nhóm menu để sidebar cân đối hơn
 const menuGroups = [
   {
@@ -41,6 +41,8 @@ const menuGroups = [
       { icon: Building2, label: 'Quản lý Rạp', href: '/admin/cinemas' },
       { icon: MapPin, label: 'Quản lý Tỉnh/TP', href: '/admin/provinces' },
       { icon: DoorOpen, label: 'Quản lý Phòng chiếu', href: '/admin/rooms' },
+      { icon: Sofa, label: 'Quản lý Loại ghế', href: '/admin/seat-types' },
+      { icon: Armchair, label: 'Quản lý Ghế', href: '/admin/seats' },
       { icon: Clock, label: 'Quản lý Suất chiếu', href: '/admin/slots' },
       { icon: Ticket, label: 'Quản lý Vé', href: '/admin/tickets' },
     ]
@@ -49,7 +51,7 @@ const menuGroups = [
     title: 'HỆ THỐNG',
     items: [
       { icon: Users, label: 'Người dùng', href: '/admin/users' },
-      { icon: Settings, label: 'Cài đặt', href: '/admin/settings' },
+      { icon: Tag, label: 'Giá vé', href: '/admin/settings' },
     ]
   }
 ];
@@ -125,12 +127,7 @@ export default function Sidebar() {
       </nav>
 
       {/* 3. Footer Section - Logout */}
-      <div className="p-4 border-t border-gray-100 bg-gray-50/50">
-        <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-gray-600 hover:bg-white hover:text-red-600 hover:shadow-md transition-all duration-300 border border-transparent hover:border-gray-100 group">
-          <LogOut className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-          <span>Đăng xuất</span>
-        </button>
-        
+      <div className="p-4 border-t border-gray-100 bg-gray-50/50">     
         <div className="mt-4 px-4 text-xs text-center text-gray-400 font-medium">
             &copy; 2024 CGV Management v1.0
         </div>

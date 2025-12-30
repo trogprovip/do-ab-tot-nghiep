@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { prisma } from '../prisma';
 import { accounts, accounts_role } from '@prisma/client';
 

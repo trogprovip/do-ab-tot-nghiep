@@ -3,9 +3,13 @@
 import React, { useState, useEffect } from 'react';
 import DataTable from '@/components/DataTable';
 import { Plus, Search } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { roomService, Room } from '@/lib/services/roomService';
 
 export default function RoomsPage() {
-  const [rooms, setRooms] = useState([]);
+  const router = useRouter();
+  const [rooms, setRooms] = useState<Room[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -16,15 +20,12 @@ export default function RoomsPage() {
   const fetchRooms = async () => {
     try {
       setLoading(true);
-      const params = new URLSearchParams({
-        page: '0',
-        size: '100',
-        ...(searchTerm && { search: searchTerm }),
+      const response = await roomService.getRooms({
+        page: 0,
+        size: 100,
+        search: searchTerm || undefined,
       });
-      
-      const response = await fetch(`/api/rooms?${params}`);
-      const data = await response.json();
-      setRooms(data.content || []);
+      setRooms(response.content);
     } catch (error) {
       console.error('Error fetching rooms:', error);
     } finally {
@@ -32,10 +33,47 @@ export default function RoomsPage() {
     }
   };
 
+  const handleEdit = (row: Room) => {
+    router.push(`/admin/rooms/edit/${row.id}`);
+  };
+
+  const handleDelete = async (row: Room) => {
+    if (!confirm('Bạn có chắc chắn muốn xóa phòng chiếu này?')) {
+      return;
+    }
+
+    try {
+      await roomService.deleteRoom(row.id);
+      alert('Xóa phòng chiếu thành công!');
+      fetchRooms();
+    } catch (error) {
+      console.error('Error deleting room:', error);
+      alert('Có lỗi xảy ra khi xóa phòng chiếu!');
+    }
+  };
+
   const columns = [
     { key: 'id', label: 'ID' },
-    { key: 'room_name', label: 'Tên phòng' },
-    { key: 'room_type', label: 'Loại phòng' },
+    { 
+      key: 'room_name', 
+      label: 'Tên phòng',
+      render: (value: string, row: Room) => (
+        <div>
+          <div className="font-medium">{value}</div>
+          {row.cinemas && (
+            <div className="text-xs text-gray-500">
+              {row.cinemas.cinema_name}
+              {row.cinemas.provinces && ` - ${row.cinemas.provinces.province_name}`}
+            </div>
+          )}
+        </div>
+      )
+    },
+    { 
+      key: 'room_type', 
+      label: 'Loại phòng',
+      render: (value: string | null) => value || '-'
+    },
     { key: 'total_seats', label: 'Số ghế' },
     { 
       key: 'status', 
@@ -59,10 +97,12 @@ export default function RoomsPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold text-gray-900">Quản lý Phòng chiếu</h1>
-        <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-          <Plus className="w-4 h-4" />
-          Thêm phòng chiếu
-        </button>
+        <Link href="/admin/rooms/create">
+          <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+            <Plus className="w-4 h-4" />
+            Thêm phòng chiếu
+          </button>
+        </Link>
       </div>
 
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
@@ -86,6 +126,8 @@ export default function RoomsPage() {
         <DataTable
           columns={columns}
           data={rooms}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
         />
       )}
     </div>

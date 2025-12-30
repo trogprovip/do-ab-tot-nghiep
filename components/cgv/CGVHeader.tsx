@@ -4,12 +4,15 @@ import React, { useState, useEffect } from 'react';
 import { 
   UserOutlined, ShoppingCartOutlined, MenuOutlined, SearchOutlined,
   GlobalOutlined, VideoCameraOutlined, PlayCircleOutlined, StarOutlined,
-  ShopOutlined, PhoneOutlined, GiftOutlined, IdcardOutlined, DownOutlined
+  ShopOutlined, PhoneOutlined, GiftOutlined, IdcardOutlined, DownOutlined,
+  LogoutOutlined
 } from '@ant-design/icons';
 import Link from 'next/link';
+import { authService, User } from '@/lib/services/authService';
 
 export default function CGVHeader() {
   const [scrolled, setScrolled] = useState(false);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -19,6 +22,20 @@ export default function CGVHeader() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  useEffect(() => {
+    const user = authService.getCurrentUser();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setCurrentUser(user);
+  }, []);
+
+  const handleLogout = () => {
+    if (confirm('Bạn có chắc chắn muốn đăng xuất?')) {
+      authService.logout();
+      setCurrentUser(null);
+      window.location.href = '/';
+    }
+  };
 
   const quickLinks = [
     { href: '/cinemas', icon: <VideoCameraOutlined />, title: 'CGV CINEMAS', sub: 'TÌM RẠP GẦN BẠN' },
@@ -48,9 +65,23 @@ export default function CGVHeader() {
           </div>
 
           <div className="flex items-center gap-4 font-medium">
-            <Link href="/login" className="hover:text-[#ffd700] flex items-center gap-1 transition-colors">
-              <UserOutlined /> ĐĂNG NHẬP / ĐĂNG KÝ
-            </Link>
+            {currentUser ? (
+              <>
+                <span className="text-[#ffd700] flex items-center gap-1">
+                  <UserOutlined /> Xin chào, <strong>{currentUser.full_name}</strong>
+                </span>
+                <button 
+                  onClick={handleLogout}
+                  className="hover:text-[#ffd700] flex items-center gap-1 transition-colors"
+                >
+                  <LogoutOutlined /> ĐĂNG XUẤT
+                </button>
+              </>
+            ) : (
+              <Link href="/auth/login" className="hover:text-[#ffd700] flex items-center gap-1 transition-colors">
+                <UserOutlined /> ĐĂNG NHẬP / ĐĂNG KÝ
+              </Link>
+            )}
             
             <div className="flex items-center gap-1 bg-black/30 rounded-full px-2 py-0.5 border border-yellow-500/30">
               <GlobalOutlined className="text-xs text-yellow-500" />
