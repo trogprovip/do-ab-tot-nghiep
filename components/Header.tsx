@@ -1,40 +1,89 @@
 'use client';
 
-import React from 'react';
-import { Search, Mail, Bell } from 'lucide-react';
+import React, { useState } from 'react';
+import { Search, Mail, Bell, ChevronDown, Menu } from 'lucide-react';
 
 export default function Header() {
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+
   return (
-    <header className="bg-white border-b border-gray-200 px-6 py-4">
-      <div className="flex items-center justify-between">
-        <div className="flex-1 max-w-xl">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+    <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-gray-100 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07)] px-6 py-4 transition-all duration-300">
+      <div className="flex items-center justify-between max-w-7xl mx-auto">
+        
+        {/* Left: Mobile Menu & Search */}
+        <div className="flex items-center gap-4 flex-1">
+          {/* Mobile Toggle (Hidden on large screens) */}
+          <button className="lg:hidden p-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors">
+            <Menu className="w-6 h-6" />
+          </button>
+
+          {/* Dynamic Search Bar */}
+          <div className={`relative transition-all duration-500 ease-in-out ${isSearchFocused ? 'w-full max-w-lg' : 'w-full max-w-sm'}`}>
+            <Search 
+              className={`absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 transition-colors duration-300 ${isSearchFocused ? 'text-red-500' : 'text-gray-400'}`} 
+            />
             <input
               type="text"
-              placeholder="Search Anything..."
-              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Tìm kiếm phim, rạp, ưu đãi..."
+              onFocus={() => setIsSearchFocused(true)}
+              onBlur={() => setIsSearchFocused(false)}
+              className={`w-full pl-12 pr-4 py-2.5 bg-gray-50/50 border rounded-full text-sm font-medium transition-all duration-300 focus:outline-none 
+                ${isSearchFocused 
+                  ? 'border-red-500 ring-4 ring-red-500/10 bg-white shadow-lg' 
+                  : 'border-gray-200 hover:border-gray-300 hover:bg-white'
+                }`}
             />
+            {/* Search Shortcut Hint (Optional) */}
+            {!isSearchFocused && (
+               <div className="absolute right-4 top-1/2 -translate-y-1/2 hidden md:block pointer-events-none">
+                 <kbd className="inline-flex items-center border border-gray-200 rounded px-2 text-xs font-sans font-medium text-gray-400">⌘K</kbd>
+               </div>
+            )}
           </div>
         </div>
 
-        <div className="flex items-center gap-4 ml-6">
-          <button className="relative p-2 text-gray-600 hover:bg-gray-100 rounded-lg">
-            <Mail className="w-5 h-5" />
+        {/* Right: Actions & Profile */}
+        <div className="flex items-center gap-2 md:gap-4 ml-6">
+          
+          {/* Messages */}
+          <button className="relative p-2.5 text-gray-500 hover:bg-red-50 hover:text-red-600 rounded-full transition-all duration-300 group">
+            <Mail className="w-5 h-5 group-hover:scale-110 transition-transform" />
+            <span className="absolute top-2 right-2.5 w-2 h-2 bg-blue-500 border-2 border-white rounded-full scale-0 group-hover:scale-100 transition-transform"></span>
           </button>
           
-          <button className="relative p-2 text-gray-600 hover:bg-gray-100 rounded-lg">
-            <Bell className="w-5 h-5" />
-            <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+          {/* Notifications with Pulse Effect */}
+          <button className="relative p-2.5 text-gray-500 hover:bg-red-50 hover:text-red-600 rounded-full transition-all duration-300 group mr-2">
+            <Bell className="w-5 h-5 group-hover:rotate-12 transition-transform" />
+            {/* Ping Animation */}
+            <span className="absolute top-2 right-2.5 flex h-2.5 w-2.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500 border-2 border-white"></span>
+            </span>
           </button>
 
-          <div className="flex items-center gap-3 pl-4 border-l border-gray-200">
-            <div className="text-right">
-              <p className="text-sm font-medium text-gray-900">Hi, John Kuy</p>
+          {/* User Profile */}
+          <div className="flex items-center gap-3 pl-2 md:pl-6 border-l border-gray-200 cursor-pointer group">
+            <div className="text-right hidden md:block">
+              <p className="text-xs text-gray-400 font-medium mb-0.5 group-hover:text-red-500 transition-colors">Xin chào,</p>
+              <p className="text-sm font-bold text-gray-800 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-red-600 group-hover:to-orange-500 transition-all">
+                Anh Trongdz123
+              </p>
             </div>
-            <div className="w-10 h-10 bg-gray-300 rounded-full overflow-hidden">
-              <div className="w-full h-full bg-linear-to-br from-blue-400 to-purple-500"></div>
+            
+            <div className="relative">
+                {/* Avatar Ring */}
+                <div className="absolute -inset-0.5 bg-gradient-to-br from-red-500 to-yellow-500 rounded-full blur opacity-0 group-hover:opacity-70 transition duration-500"></div>
+                <div className="relative w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-md">
+                    {/* Placeholder Avatar Gradient or Image */}
+                    <div className="w-full h-full bg-gradient-to-tr from-blue-100 via-blue-300 to-blue-500 flex items-center justify-center">
+                        <span className="text-white font-bold text-sm">TD</span>
+                    </div>
+                    {/* Online Status Dot */}
+                    <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
+                </div>
             </div>
+            
+            <ChevronDown className="w-4 h-4 text-gray-400 group-hover:text-gray-600 transition-transform group-hover:rotate-180 hidden sm:block" />
           </div>
         </div>
       </div>

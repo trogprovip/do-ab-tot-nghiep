@@ -39,7 +39,8 @@ export default function CinemaForm({ initialData, onSubmit, isEditing = false }:
     try {
       const response = await fetch('/api/provinces');
       const data = await response.json();
-      setProvinces(data);
+      // Fix: API bây giờ trả về { content: [], ... } thay vì array trực tiếp
+      setProvinces(Array.isArray(data) ? data : data.content || []);
     } catch (error) {
       console.error('Error fetching provinces:', error);
     }
@@ -53,13 +54,11 @@ export default function CinemaForm({ initialData, onSubmit, isEditing = false }:
 
     setGeocoding(true);
     try {
-      // Lấy tên tỉnh để tạo địa chỉ đầy đủ
       const province = provinces.find(p => p.id === formData.province_id);
       const fullAddress = province 
         ? `${formData.address}, ${province.province_name}, Vietnam`
         : `${formData.address}, Vietnam`;
 
-      // Sử dụng Nominatim Geocoding API (OpenStreetMap)
       const response = await fetch(
         `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fullAddress)}&limit=1`,
         {
@@ -123,7 +122,6 @@ export default function CinemaForm({ initialData, onSubmit, isEditing = false }:
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Tên rạp */}
         <div className="md:col-span-2">
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Tên rạp <span className="text-red-500">*</span>
@@ -139,7 +137,6 @@ export default function CinemaForm({ initialData, onSubmit, isEditing = false }:
           />
         </div>
 
-        {/* Địa chỉ */}
         <div className="md:col-span-2">
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Địa chỉ <span className="text-red-500">*</span>
@@ -155,7 +152,6 @@ export default function CinemaForm({ initialData, onSubmit, isEditing = false }:
           />
         </div>
 
-        {/* Tỉnh/Thành phố */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Tỉnh/Thành phố <span className="text-red-500">*</span>
@@ -176,7 +172,6 @@ export default function CinemaForm({ initialData, onSubmit, isEditing = false }:
           </select>
         </div>
 
-        {/* Trạng thái */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Trạng thái <span className="text-red-500">*</span>
@@ -192,7 +187,6 @@ export default function CinemaForm({ initialData, onSubmit, isEditing = false }:
           </select>
         </div>
 
-        {/* Số điện thoại */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Số điện thoại <span className="text-red-500">*</span>
@@ -208,7 +202,6 @@ export default function CinemaForm({ initialData, onSubmit, isEditing = false }:
           />
         </div>
 
-        {/* Email */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Email <span className="text-red-500">*</span>
@@ -224,7 +217,6 @@ export default function CinemaForm({ initialData, onSubmit, isEditing = false }:
           />
         </div>
 
-        {/* Tọa độ GPS */}
         <div className="md:col-span-2">
           <div className="flex items-center justify-between mb-2">
             <label className="block text-sm font-medium text-gray-700">
@@ -285,7 +277,6 @@ export default function CinemaForm({ initialData, onSubmit, isEditing = false }:
         </div>
       </div>
 
-      {/* Buttons */}
       <div className="flex gap-4 pt-4">
         <button
           type="submit"

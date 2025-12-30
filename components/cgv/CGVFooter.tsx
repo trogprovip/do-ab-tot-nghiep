@@ -1,142 +1,187 @@
 'use client';
 
 import React from 'react';
-import { FacebookOutlined, YoutubeOutlined, InstagramOutlined } from '@ant-design/icons';
+import { 
+  FacebookFilled, 
+  YoutubeFilled, 
+  InstagramFilled, 
+  PhoneFilled,
+  MailFilled,
+  ClockCircleFilled,
+  CheckCircleFilled,
+  SafetyCertificateFilled
+} from '@ant-design/icons';
 import Link from 'next/link';
 
 export default function CGVFooter() {
+  const brands = [
+    { name: 'IMAX', color: 'hover:text-blue-600' },
+    { name: 'STARIUM', color: 'hover:text-red-600' },
+    { name: 'GOLDCLASS', color: 'hover:text-yellow-600' },
+    { name: 'SWEETBOX', color: 'hover:text-pink-500' },
+    { name: 'PREMIUM CINEMA', color: 'hover:text-purple-600' },
+    { name: 'CINE & FORET', color: 'hover:text-green-600' },
+    { name: 'CINE & LIVING', color: 'hover:text-orange-500' },
+    { name: '4DX', color: 'hover:text-gray-800' },
+  ];
+
   return (
-    <footer className="bg-white border-t-2 border-gray-200">
-      {/* Cinema Brands */}
-      <div className="bg-gray-50 py-6 border-b">
-        <div className="container mx-auto px-4">
-          <div className="flex justify-center items-center gap-8 flex-wrap">
-            <span className="text-gray-400 font-bold">IMAX</span>
-            <span className="text-gray-400 font-bold">STARIUM</span>
-            <span className="text-gray-400 font-bold">GOLDCLASS</span>
-            <span className="text-pink-500 font-bold">SWEETBOX</span>
-            <span className="text-red-600 font-bold">PREMIUM CINEMA</span>
-            <span className="text-gray-400 font-bold">CINE & FORET</span>
-            <span className="text-gray-400 font-bold">CINE & LIVING ROOM</span>
-            <span className="text-gray-400 font-bold">CINESUITE</span>
+    <footer className="relative bg-[#fdfcf0] pt-10 text-gray-700 overflow-hidden font-sans border-t-4 border-red-600">
+      
+      {/* Họa tiết nền mờ */}
+      <div className="absolute inset-0 opacity-[0.03] pointer-events-none" 
+           style={{ backgroundImage: 'radial-gradient(#d90000 1px, transparent 1px)', backgroundSize: '24px 24px' }}>
+      </div>
+
+      {/* Cinema Brands Strip - Dải thương hiệu rạp */}
+      <div className="relative z-10 container mx-auto px-4 mb-10">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <div className="flex flex-wrap justify-center items-center gap-x-8 gap-y-4 text-sm md:text-base font-black tracking-widest text-gray-300 select-none">
+            {brands.map((brand, index) => (
+              <span key={index} className={`cursor-pointer transition-colors duration-300 ${brand.color} hover:scale-110 transform inline-block`}>
+                {brand.name}
+              </span>
+            ))}
           </div>
         </div>
       </div>
 
       {/* Main Footer Content */}
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* CGV Vietnam */}
-          <div>
-            <h3 className="font-bold text-lg mb-4">CGV Việt Nam</h3>
-            <ul className="space-y-2 text-sm text-gray-600">
-              <li><Link href="/about" className="hover:text-red-600">Giới Thiệu</Link></li>
-              <li><Link href="/online-services" className="hover:text-red-600">Tiện Ích Online</Link></li>
-              <li><Link href="/gift-card" className="hover:text-red-600">Thẻ Quà Tặng</Link></li>
-              <li><Link href="/recruitment" className="hover:text-red-600">Tuyển Dụng</Link></li>
-              <li><Link href="/advertising" className="hover:text-red-600">Liên Hệ Quảng Cáo CGV</Link></li>
-              <li><Link href="/partners" className="hover:text-red-600">Dành cho đối tác</Link></li>
-            </ul>
-          </div>
-
-          {/* Terms & Conditions */}
-          <div>
-            <h3 className="font-bold text-lg mb-4">Điều khoản sử dụng</h3>
-            <ul className="space-y-2 text-sm text-gray-600">
-              <li><Link href="/terms-general" className="hover:text-red-600">Điều Khoản Chung</Link></li>
-              <li><Link href="/terms-transaction" className="hover:text-red-600">Điều Khoản Giao Dịch</Link></li>
-              <li><Link href="/terms-payment" className="hover:text-red-600">Chính Sách Thanh Toán</Link></li>
-              <li><Link href="/privacy" className="hover:text-red-600">Chính Sách Bảo Mật</Link></li>
-              <li><Link href="/faq" className="hover:text-red-600">Câu Hỏi Thường Gặp</Link></li>
-            </ul>
-          </div>
-
-          {/* Connect with us */}
-          <div>
-            <h3 className="font-bold text-lg mb-4">Kết nối với chúng tôi</h3>
-            <div className="flex gap-4 mb-6">
-              <Link href="https://facebook.com/cgvcinemasvietnam" target="_blank">
-                <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700 transition-colors">
-                  <FacebookOutlined className="text-white text-xl" />
-                </div>
-              </Link>
-              <Link href="https://youtube.com/cgvcinemas" target="_blank">
-                <div className="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center hover:bg-red-700 transition-colors">
-                  <YoutubeOutlined className="text-white text-xl" />
-                </div>
-              </Link>
-              <Link href="https://instagram.com/cgvcinemasvietnam" target="_blank">
-                <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-pink-600 rounded-full flex items-center justify-center hover:opacity-90 transition-opacity">
-                  <InstagramOutlined className="text-white text-xl" />
-                </div>
-              </Link>
-              <Link href="https://zalo.me/cgvcinemas" target="_blank">
-                <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center hover:bg-blue-600 transition-colors">
-                  <span className="text-white font-bold text-sm">Zalo</span>
-                </div>
-              </Link>
-            </div>
-
-            {/* Certification Badge */}
-            <div className="mt-4">
-              <div className="border-2 border-blue-600 rounded-lg p-3 inline-block">
-                <div className="flex items-center gap-2">
-                  <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
-                    <span className="text-white font-bold text-xs">✓</span>
-                  </div>
-                  <div className="text-xs">
-                    <div className="font-bold text-blue-600">ĐÃ THÔNG BÁO</div>
-                    <div className="text-gray-600">BỘ CÔNG THƯƠNG</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Customer Care */}
-          <div>
-            <h3 className="font-bold text-lg mb-4">Chăm sóc khách hàng</h3>
-            <div className="space-y-3 text-sm text-gray-600">
-              <div>
-                <p className="font-semibold text-gray-800">Hotline: 1900 6017</p>
-              </div>
-              <div>
-                <p>Giờ làm việc: 8:00 - 22:00</p>
-                <p>(Tất cả các ngày bao gồm cả Lễ Tết)</p>
-              </div>
-              <div>
-                <p>Email hỗ trợ: <Link href="mailto:hoidap@cgv.vn" className="text-blue-600 hover:underline">hoidap@cgv.vn</Link></p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Company Info */}
-      <div className="bg-gray-50 py-6 border-t">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center gap-4 mb-4">
-            <div className="text-red-600 font-bold text-2xl">CGV</div>
-            <span className="text-yellow-500 text-xl">★</span>
-          </div>
+      <div className="relative z-10 container mx-auto px-4 pb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
           
-          <div className="text-xs text-gray-600 space-y-1">
-            <p className="font-semibold">CÔNG TY TNHH CJ CGV VIỆT NAM</p>
-            <p>Giấy CNĐKDN: 0303675393, đăng ký lần đầu ngày 31/7/2008, được cấp bởi Sở Kế hoạch và Đầu tư Thành phố Hồ Chí Minh</p>
-            <p>Địa chỉ: Lầu 2, số 7/28, đường Thành Thái, phường Điện Hồng, Thành phố Hồ Chí Minh, Việt Nam</p>
-            <p>Đường dây nóng (Hotline): 1900 6017</p>
-            <p className="mt-4">COPYRIGHT 2017 CJ CGV VIETNAM CO., LTD. ALL RIGHTS RESERVED</p>
+          {/* Column 1: CGV Vietnam */}
+          <div>
+            <h3 className="font-extrabold text-xl text-red-700 mb-6 uppercase tracking-tight border-b-2 border-red-100 inline-block pb-1">CGV Việt Nam</h3>
+            <ul className="space-y-3 text-sm font-medium">
+              {['Giới Thiệu', 'Tiện Ích Online', 'Thẻ Quà Tặng', 'Tuyển Dụng', 'Liên Hệ Quảng Cáo'].map((item) => (
+                <li key={item}>
+                  <Link href="#" className="flex items-center group">
+                    <span className="w-1.5 h-1.5 bg-gray-300 rounded-full mr-2 group-hover:bg-red-600 transition-colors"></span>
+                    <span className="group-hover:text-red-600 group-hover:translate-x-1 transition-all duration-300">{item}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Column 2: Terms & Conditions */}
+          <div>
+            <h3 className="font-extrabold text-xl text-red-700 mb-6 uppercase tracking-tight border-b-2 border-red-100 inline-block pb-1">Điều khoản</h3>
+            <ul className="space-y-3 text-sm font-medium">
+              {['Điều Khoản Chung', 'Điều Khoản Giao Dịch', 'Chính Sách Thanh Toán', 'Chính Sách Bảo Mật', 'Câu Hỏi Thường Gặp'].map((item) => (
+                <li key={item}>
+                  <Link href="#" className="flex items-center group">
+                    <span className="w-1.5 h-1.5 bg-gray-300 rounded-full mr-2 group-hover:bg-red-600 transition-colors"></span>
+                    <span className="group-hover:text-red-600 group-hover:translate-x-1 transition-all duration-300">{item}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Column 3: Connect with us - Màu mè hơn */}
+          <div>
+            <h3 className="font-extrabold text-xl text-red-700 mb-6 uppercase tracking-tight border-b-2 border-red-100 inline-block pb-1">Kết nối</h3>
+            <div className="flex gap-3 mb-6">
+              <Link href="https://facebook.com" target="_blank" className="group">
+                <div className="w-11 h-11 bg-white border-2 border-blue-600 rounded-full flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300 shadow-lg group-hover:-translate-y-1">
+                  <FacebookFilled className="text-xl" />
+                </div>
+              </Link>
+              <Link href="https://youtube.com" target="_blank" className="group">
+                <div className="w-11 h-11 bg-white border-2 border-red-600 rounded-full flex items-center justify-center text-red-600 group-hover:bg-red-600 group-hover:text-white transition-all duration-300 shadow-lg group-hover:-translate-y-1">
+                  <YoutubeFilled className="text-xl" />
+                </div>
+              </Link>
+              <Link href="https://instagram.com" target="_blank" className="group">
+                <div className="w-11 h-11 bg-white border-2 border-pink-500 rounded-full flex items-center justify-center text-pink-500 group-hover:bg-gradient-to-tr group-hover:from-purple-500 group-hover:to-pink-500 group-hover:border-transparent group-hover:text-white transition-all duration-300 shadow-lg group-hover:-translate-y-1">
+                  <InstagramFilled className="text-xl" />
+                </div>
+              </Link>
+              <Link href="https://zalo.me" target="_blank" className="group">
+                <div className="w-11 h-11 bg-white border-2 border-blue-400 rounded-full flex items-center justify-center text-blue-400 group-hover:bg-blue-400 group-hover:text-white transition-all duration-300 shadow-lg group-hover:-translate-y-1 font-bold text-xs">
+                  Zalo
+                </div>
+              </Link>
+            </div>
+
+            {/* Certification Badge - Style mới */}
+            <div className="inline-flex items-center gap-3 px-4 py-2 bg-white border-2 border-blue-600 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+               <SafetyCertificateFilled className="text-3xl text-blue-600" />
+               <div className="leading-tight">
+                  <div className="text-[10px] font-bold text-gray-500">ĐÃ THÔNG BÁO</div>
+                  <div className="text-xs font-black text-blue-800">BỘ CÔNG THƯƠNG</div>
+               </div>
+            </div>
+          </div>
+
+          {/* Column 4: Customer Care - Nổi bật Hotline */}
+          <div>
+            <h3 className="font-extrabold text-xl text-red-700 mb-6 uppercase tracking-tight border-b-2 border-red-100 inline-block pb-1">Chăm sóc khách hàng</h3>
+            <div className="bg-white p-5 rounded-xl border border-red-100 shadow-[0_4px_15px_rgba(220,38,38,0.05)]">
+              <div className="mb-4 text-center">
+                 <p className="text-xs text-gray-500 uppercase font-bold mb-1">Hotline hỗ trợ</p>
+                 <a href="tel:19006017" className="text-3xl font-black text-red-600 hover:scale-105 inline-block transition-transform flex items-center justify-center gap-2">
+                    <PhoneFilled className="text-2xl"/> 1900 6017
+                 </a>
+                 <p className="text-xs text-gray-400 mt-1">1000đ/phút</p>
+              </div>
+              
+              <div className="space-y-2 text-sm text-gray-600 border-t border-dashed border-gray-200 pt-3">
+                 <div className="flex items-start gap-2">
+                    <ClockCircleFilled className="text-red-500 mt-0.5" />
+                    <span>08:00 - 22:00 (Tất cả các ngày)</span>
+                 </div>
+                 <div className="flex items-start gap-2">
+                    <MailFilled className="text-red-500 mt-0.5" />
+                    <a href="mailto:hoidap@cgv.vn" className="hover:text-red-600 hover:underline">hoidap@cgv.vn</a>
+                 </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Brick Wall Bottom */}
-      <div 
-        className="h-16 bg-orange-800"
-        style={{
-          backgroundImage: 'repeating-linear-gradient(0deg, #8B4513 0px, #8B4513 2px, transparent 2px, transparent 16px), repeating-linear-gradient(90deg, #A0522D 0px, #A0522D 2px, transparent 2px, transparent 60px)',
-        }}
-      />
+      {/* Company Info - Nền tối tạo độ nặng cho footer */}
+      <div className="bg-[#1a1a1a] text-gray-400 py-8 border-t-4 border-yellow-500 relative">
+         <div className="container mx-auto px-4">
+             {/* Logo Footer */}
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-6">
+                <div 
+                    className="text-4xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-red-400 drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]"
+                    style={{ fontFamily: 'Impact, sans-serif' }}
+                >
+                    CGV CINEMAS
+                </div>
+                <div className="flex gap-4">
+                    <span className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-white hover:text-black transition-colors cursor-pointer"><CheckCircleFilled /></span>
+                    <span className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-white hover:text-black transition-colors cursor-pointer"><MailFilled /></span>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-xs leading-relaxed">
+                <div>
+                    <h4 className="text-white font-bold mb-2 uppercase">Công Ty TNHH CJ CGV Việt Nam</h4>
+                    <p>Giấy CNĐKDN: 0303675393, đăng ký lần đầu ngày 31/7/2008, được cấp bởi Sở Kế hoạch và Đầu tư Thành phố Hồ Chí Minh.</p>
+                    <p className="mt-2">Địa chỉ: Lầu 2, số 7/28, đường Thành Thái, phường 14, Quận 10, Thành phố Hồ Chí Minh, Việt Nam.</p>
+                </div>
+                <div className="md:text-right flex flex-col justify-end">
+                    <p>COPYRIGHT © 2017 CJ CGV VIETNAM CO., LTD.</p>
+                    <p>ALL RIGHTS RESERVED.</p>
+                    <div className="mt-2 text-yellow-600 italic">Chính sách bảo mật | Điều khoản sử dụng</div>
+                </div>
+            </div>
+         </div>
+
+         {/* Decorative Brick Wall Bottom */}
+         <div 
+           className="absolute bottom-0 left-0 right-0 h-3 opacity-30"
+           style={{
+             backgroundImage: 'repeating-linear-gradient(45deg, #b91c1c 0px, #b91c1c 10px, #991b1b 10px, #991b1b 20px)',
+           }}
+         />
+      </div>
     </footer>
   );
 }
