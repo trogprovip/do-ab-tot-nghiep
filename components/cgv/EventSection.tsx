@@ -118,7 +118,7 @@ export default function EventSection() {
           >
             {events.map((event) => (
               <div key={event.id} className="px-3 pb-4 pt-2">
-                <Link href={`/events/${event.id}`}>
+                <Link href={`/cgv/events/${event.id}`}>
                     <div className="group relative bg-white rounded-2xl overflow-hidden shadow-[0_5px_15px_rgba(0,0,0,0.05)] hover:shadow-[0_20px_40px_rgba(220,38,38,0.15)] transition-all duration-300 hover:-translate-y-2 border border-gray-100 h-full">
                     
                     {/* Image Area - Đã bỏ opacity thấp */}
@@ -165,7 +165,7 @@ export default function EventSection() {
         {/* Special Offers Grid - Đã làm ảnh sáng và rõ hơn */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {specialOffers.map((offer) => (
-            <Link href={`/offers/${offer.id}`} key={offer.id}>
+            <Link href={`/cgv/offers/${offer.id}`} key={offer.id}>
                 <div className="relative h-48 rounded-2xl overflow-hidden shadow-lg transition-all duration-300 hover:shadow-2xl hover:scale-[1.02] cursor-pointer group">
                     
                     {/* HÌNH NỀN: Rõ nét, không bị mờ đục */}

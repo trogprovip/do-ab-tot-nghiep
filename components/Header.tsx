@@ -38,29 +38,6 @@ export default function Header() {
             <Menu className="w-6 h-6" />
           </button>
 
-          {/* Dynamic Search Bar */}
-          <div className={`relative transition-all duration-500 ease-in-out ${isSearchFocused ? 'w-full max-w-lg' : 'w-full max-w-sm'}`}>
-            <Search 
-              className={`absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 transition-colors duration-300 ${isSearchFocused ? 'text-red-500' : 'text-gray-400'}`} 
-            />
-            <input
-              type="text"
-              placeholder="Tìm kiếm phim, rạp, ưu đãi..."
-              onFocus={() => setIsSearchFocused(true)}
-              onBlur={() => setIsSearchFocused(false)}
-              className={`w-full pl-12 pr-4 py-2.5 bg-gray-50/50 border rounded-full text-sm font-medium transition-all duration-300 focus:outline-none 
-                ${isSearchFocused 
-                  ? 'border-red-500 ring-4 ring-red-500/10 bg-white shadow-lg' 
-                  : 'border-gray-200 hover:border-gray-300 hover:bg-white'
-                }`}
-            />
-            {/* Search Shortcut Hint (Optional) */}
-            {!isSearchFocused && (
-               <div className="absolute right-4 top-1/2 -translate-y-1/2 hidden md:block pointer-events-none">
-                 <kbd className="inline-flex items-center border border-gray-200 rounded px-2 text-xs font-sans font-medium text-gray-400">⌘K</kbd>
-               </div>
-            )}
-          </div>
         </div>
 
         {/* Right: Actions & Profile */}

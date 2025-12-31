@@ -7,6 +7,7 @@ import { Edit, Trash2, Eye } from 'lucide-react';
 interface Column {
   key: string;
   label: string;
+  width?: string; // Thêm width option
   render?: (value: any, row: any) => React.ReactNode;
 }
 
@@ -22,19 +23,20 @@ export default function DataTable({ columns, data, onEdit, onDelete, onView }: D
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="w-full table-fixed">
+        <table className="w-full">
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
               {columns.map((column) => (
                 <th
                   key={column.key}
-                  className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  style={{ width: column.width }}
+                  className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap"
                 >
                   {column.label}
                 </th>
               ))}
               {(onEdit || onDelete || onView) && (
-                <th className="w-32 px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider sticky right-0 bg-gray-50">
+                <th className="w-32 px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider sticky right-0 bg-gray-50 whitespace-nowrap">
                   Thao tác
                 </th>
               )}
@@ -54,8 +56,14 @@ export default function DataTable({ columns, data, onEdit, onDelete, onView }: D
               data.map((row, index) => (
                 <tr key={index} className="hover:bg-gray-50">
                   {columns.map((column) => (
-                    <td key={column.key} className="px-4 py-4 text-sm text-gray-900">
-                      {column.render ? column.render(row[column.key], row) : row[column.key]}
+                    <td 
+                      key={column.key} 
+                      style={{ width: column.width }}
+                      className="px-4 py-4 text-sm text-gray-900"
+                    >
+                      <div className="break-words">
+                        {column.render ? column.render(row[column.key], row) : row[column.key]}
+                      </div>
                     </td>
                   ))}
                   {(onEdit || onDelete || onView) && (

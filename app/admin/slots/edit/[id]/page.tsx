@@ -25,15 +25,27 @@ export default function EditSlotPage({ params }: { params: Promise<{ id: string 
     }
   }, [slotId]);
 
+  // Hàm helper để convert giờ DB -> Giờ input (Giữ nguyên số, không bị trừ 7 tiếng)
+  const formatForInput = (dateStr: string | Date) => {
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return '';
+    // Trừ offset để khi toISOString() nó trả về đúng giờ địa phương
+    const offset = date.getTimezoneOffset() * 60000;
+    return (new Date(date.getTime() - offset)).toISOString().slice(0, 16);
+  };
+
   const fetchSlot = async () => {
     if (!slotId) return;
     try {
       const slot = await slotService.getSlotById(slotId);
+      
+      // Load dữ liệu vào form
       setInitialData({
         movie_id: slot.movie_id,
         room_id: slot.room_id || 0,
-        show_time: new Date(slot.show_time).toISOString().slice(0, 16),
-        end_time: new Date(slot.end_time).toISOString().slice(0, 16),
+        // QUAN TRỌNG: Dùng formatForInput thay vì toISOString() thuần
+        show_time: formatForInput(slot.show_time),
+        end_time: formatForInput(slot.end_time),
         price: Number(slot.price),
         empty_seats: slot.empty_seats,
       });
@@ -49,11 +61,13 @@ export default function EditSlotPage({ params }: { params: Promise<{ id: string 
   const handleSubmit = async (data: UpdateSlotForm) => {
     if (!slotId) return;
     try {
+      // SlotForm đã xử lý format dữ liệu đầu ra rồi, ở đây chỉ cần gọi API
       await slotService.updateSlot(slotId, data);
       alert('Cập nhật suất chiếu thành công!');
       router.push('/admin/slots');
     } catch (error) {
       console.error('Error updating slot:', error);
+      // Ném lỗi để SlotForm catch được và hiển thị message đỏ
       throw new Error('Có lỗi xảy ra khi cập nhật suất chiếu');
     }
   };

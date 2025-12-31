@@ -48,8 +48,11 @@ export default function MoviesPage() {
     }
   };
 
+  const handleView = (movie: Movie) => {
+    window.location.href = `/admin/movies/${movie.id}`;
+  };
+
   const handleEdit = (movie: Movie) => {
-    // Chuyển đến trang chỉnh sửa phim
     window.location.href = `/admin/movies/edit/${movie.id}`;
   };
 
@@ -152,7 +155,7 @@ export default function MoviesPage() {
           data={movies}
           onDelete={handleDelete}
           onEdit={handleEdit}
-          onView={(movie) => handleEdit(movie)}
+          onView={handleView}
         />
       )}
     </div>

@@ -52,16 +52,35 @@ export default function SlotsPage() {
     }
   };
 
+  // --- SỬA LOGIC HIỂN THỊ TẠI ĐÂY ---
+  const formatLocalDateTime = (dateString: string) => {
+    if (!dateString) return '-';
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return '-';
+    
+    // QUAN TRỌNG: Dùng getUTC... để lấy giờ nguyên bản từ DB
+    // Nếu dùng .getHours() (như cũ), trình duyệt sẽ cộng thêm 7 tiếng -> Lệch giờ
+    const day = String(date.getUTCDate()).padStart(2, '0');
+    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+    const year = date.getUTCFullYear();
+    const hours = String(date.getUTCHours()).padStart(2, '0');
+    const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+    
+    return `${hours}:${minutes} ${day}/${month}/${year}`;
+  };
+
   const columns = [
-    { key: 'id', label: 'ID' },
+    { key: 'id', label: 'ID', width: '60px' },
     { 
       key: 'movies', 
       label: 'Phim',
+      width: '250px',
       render: (value: Slot['movies']) => value?.title || '-'
     },
     { 
       key: 'rooms', 
       label: 'Phòng chiếu',
+      width: '200px',
       render: (value: Slot['rooms']) => {
         if (!value) return '-';
         return (
@@ -77,14 +96,16 @@ export default function SlotsPage() {
     { 
       key: 'show_time', 
       label: 'Giờ chiếu',
-      render: (value: string) => new Date(value).toLocaleString('vi-VN')
+      width: '150px',
+      render: (value: string) => formatLocalDateTime(value)
     },
     { 
       key: 'price', 
       label: 'Giá vé',
-      render: (value: number) => `${value.toLocaleString('vi-VN')} đ`
+      width: '120px',
+      render: (value: number) => `${Number(value || 0).toLocaleString('vi-VN')} đ`
     },
-    { key: 'empty_seats', label: 'Ghế trống' },
+    { key: 'empty_seats', label: 'Ghế trống', width: '100px' },
   ];
 
   return (

@@ -47,10 +47,7 @@ export default function HeroBanner() {
           {/* Nút Previous - Cách điệu Glassmorphism */}
           <button
             onClick={() => carouselRef.current?.prev()}
-            className="absolute left-4 top-1/2 -translate-y-1/2 z-30 w-12 h-12 flex items-center justify-center
-                       bg-white/10 backdrop-blur-md border border-white/30 text-white rounded-full 
-                       hover:bg-red-600 hover:border-red-600 hover:scale-110 hover:shadow-[0_0_15px_rgba(220,38,38,0.8)]
-                       transition-all duration-300 opacity-0 group-hover:opacity-100 translate-x-[-20px] group-hover:translate-x-0"
+            className="absolute left-4 top-1/2 -translate-y-1/2 z-30 w-12 h-12 flex items-center justify-center bg-white/10 backdrop-blur-md border border-white/30 text-white rounded-full hover:bg-red-600 hover:border-red-600 hover:scale-110 hover:shadow-[0_0_15px_rgba(220,38,38,0.8)] transition-all duration-300 opacity-0 group-hover:opacity-100 translate-x-[-20px] group-hover:translate-x-0"
           >
             <LeftOutlined className="text-xl" />
           </button>
@@ -119,18 +116,14 @@ export default function HeroBanner() {
           {/* Nút Next */}
           <button
             onClick={() => carouselRef.current?.next()}
-            className="absolute right-4 top-1/2 -translate-y-1/2 z-30 w-12 h-12 flex items-center justify-center
-                       bg-white/10 backdrop-blur-md border border-white/30 text-white rounded-full 
-                       hover:bg-red-600 hover:border-red-600 hover:scale-110 hover:shadow-[0_0_15px_rgba(220,38,38,0.8)]
-                       transition-all duration-300 opacity-0 group-hover:opacity-100 translate-x-[20px] group-hover:translate-x-0"
+            className="absolute right-4 top-1/2 -translate-y-1/2 z-30 w-12 h-12 flex items-center justify-center bg-white/10 backdrop-blur-md border border-white/30 text-white rounded-full hover:bg-red-600 hover:border-red-600 hover:scale-110 hover:shadow-[0_0_15px_rgba(220,38,38,0.8)] transition-all duration-300 opacity-0 group-hover:opacity-100 translate-x-[20px] group-hover:translate-x-0"
           >
             <RightOutlined className="text-xl" />
           </button>
         </div>
       </div>
 
-      {/* ================= CSS ANIMATIONS ================= */}
-      <style jsx global>{`
+      <style dangerouslySetInnerHTML={{__html: `
         /* 1. Hiệu ứng Ken Burns (Zoom ảnh nền) */
         @keyframes ken-burns {
           0% { transform: scale(1); }
@@ -139,7 +132,6 @@ export default function HeroBanner() {
         .animate-ken-burns {
           animation: ken-burns 10s ease-out infinite alternate;
         }
-
         /* 2. Hiệu ứng trượt lên (Fade In Up) cho chữ */
         @keyframes fadeInUp {
           from {
@@ -153,17 +145,16 @@ export default function HeroBanner() {
         }
         .animate-fade-in-up {
           animation: fadeInUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-          opacity: 0; /* Mặc định ẩn để chờ animation */
+          opacity: 0;
         }
         .delay-100 { animation-delay: 0.1s; }
         .delay-200 { animation-delay: 0.2s; }
         .delay-300 { animation-delay: 0.3s; }
-
         /* 3. Hiệu ứng quét sáng (Shine) cho nút */
         @keyframes shine {
           100% { left: 125%; }
         }
-        .group-hover\\/btn\\:animate-shine {
+        .group-hover\/btn\\:animate-shine {
           animation: shine 0.75s;
           left: -75%;
           top: 0;
@@ -171,7 +162,6 @@ export default function HeroBanner() {
           height: 100%;
           transform: skewX(-25deg);
         }
-
         /* 4. Custom Dots Ant Design */
         .custom-dots-cgv li {
           width: 12px !important;
@@ -191,12 +181,11 @@ export default function HeroBanner() {
         .custom-dots-cgv {
           bottom: 25px !important;
         }
-        
         .animate-spin-slow {
           animation: spin 3s linear infinite;
         }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-      `}</style>
+      `}} />
     </div>
   );
 }

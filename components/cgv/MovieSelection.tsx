@@ -113,7 +113,7 @@ export default function MovieSelection() {
 
                     {/* Button Play giữa hình */}
                     <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 scale-50 group-hover:scale-100 z-10">
-                        <Link href={`/movies/${movie.id}`}>
+                        <Link href={`/cgv/movies/${movie.id}`}>
                             <button className="w-16 h-16 rounded-full bg-white/90 text-red-600 flex items-center justify-center shadow-[0_0_20px_rgba(220,38,38,0.5)] hover:bg-white hover:scale-110 transition-all backdrop-blur-sm">
                                 <PlayCircleFilled className="text-4xl ml-1" />
                             </button>
@@ -134,12 +134,12 @@ export default function MovieSelection() {
                   <p className="text-sm text-gray-500 mb-5 line-clamp-1 font-medium">Thể loại: Hành động, Viễn tưởng...</p>
                   
                   <div className="grid grid-cols-2 gap-3">
-                    <Link href={`/movies/${movie.id}`}>
+                    <Link href={`/cgv/movies/${movie.id}`}>
                       <button className="w-full py-2.5 rounded-xl text-sm font-bold border-2 border-red-600 text-red-600 hover:bg-red-600 hover:text-white transition-all duration-300">
                         CHI TIẾT
                       </button>
                     </Link>
-                    <Link href={`/booking/${movie.id}`}>
+                    <Link href={`/cgv/booking?movie=${movie.id}`}>
                       <button className="w-full py-2.5 rounded-xl text-sm font-bold bg-gradient-to-r from-red-600 to-red-500 text-white shadow-md hover:shadow-lg hover:shadow-red-500/30 hover:to-red-400 transition-all duration-300 flex items-center justify-center gap-1 group/btn">
                         <ShoppingCartOutlined className="group-hover/btn:animate-bounce"/> MUA VÉ
                       </button>
@@ -153,7 +153,7 @@ export default function MovieSelection() {
 
         {/* View All Button - Màu đỏ rực */}
         <div className="text-center mt-10">
-          <Link href="/movies">
+          <Link href="/cgv/movies">
             <button className="group relative inline-flex items-center justify-center px-10 py-3.5 overflow-hidden font-black text-red-600 transition-all duration-300 bg-white border-2 border-red-600 rounded-full hover:bg-red-600 hover:text-white shadow-md hover:shadow-xl hover:shadow-red-600/20">
               <span className="mr-2 uppercase tracking-widest text-sm">Xem tất cả phim</span>
               <RightOutlined className="group-hover:translate-x-1 transition-transform text-lg" />
