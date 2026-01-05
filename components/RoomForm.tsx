@@ -3,10 +3,18 @@
 import React, { useState, useEffect } from 'react';
 import { CreateRoomForm, UpdateRoomForm } from '@/lib/services/roomService';
 import { cinemaService } from '@/lib/services/cinemaService';
+import axios from 'axios';
 
 interface Cinema {
   id: number;
   cinema_name: string;
+}
+
+interface SeatType {
+  id: number;
+  type_name: string;
+  price_multiplier: number;
+  description: string | null;
 }
 
 interface RoomFormProps {
@@ -25,11 +33,13 @@ export default function RoomForm({ initialData, onSubmit, isEditing = false }: R
   });
 
   const [cinemas, setCinemas] = useState<Cinema[]>([]);
+  const [seatTypes, setSeatTypes] = useState<SeatType[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchCinemas();
+    fetchSeatTypes();
   }, []);
 
   const fetchCinemas = async () => {
@@ -38,6 +48,17 @@ export default function RoomForm({ initialData, onSubmit, isEditing = false }: R
       setCinemas(response.content);
     } catch (error) {
       console.error('Error fetching cinemas:', error);
+    }
+  };
+
+  const fetchSeatTypes = async () => {
+    try {
+      const response = await axios.get('/api/seat-types');
+      if (response.data.success) {
+        setSeatTypes(response.data.data);
+      }
+    } catch (error) {
+      console.error('Error fetching seat types:', error);
     }
   };
 
@@ -109,32 +130,22 @@ export default function RoomForm({ initialData, onSubmit, isEditing = false }: R
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Loại phòng
+            Loại phòng <span className="text-red-500">*</span>
           </label>
-          <input
-            type="text"
+          <select
             name="room_type"
             value={formData.room_type}
             onChange={handleChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="VD: Standard, VIP, IMAX, 4DX"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Tổng số ghế <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="number"
-            name="total_seats"
-            value={formData.total_seats}
-            onChange={handleChange}
             required
-            min="1"
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="VD: 100"
-          />
+          >
+            <option value="">-- Chọn loại phòng --</option>
+            {seatTypes.map((seatType) => (
+              <option key={seatType.id} value={seatType.type_name}>
+                {seatType.type_name} {seatType.description && `- ${seatType.description}`}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div>

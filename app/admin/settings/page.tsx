@@ -75,7 +75,7 @@ export default function SettingsPage() {
             <input
               type="number"
               value={settings.weekdayPrice}
-              onChange={(e) => setSettings({ ...settings, weekdayPrice: parseInt(e.target.value) })}
+              onChange={(e) => setSettings({ ...settings, weekdayPrice: parseInt(e.target.value) || 0 })}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -87,7 +87,7 @@ export default function SettingsPage() {
             <input
               type="number"
               value={settings.weekendPrice}
-              onChange={(e) => setSettings({ ...settings, weekendPrice: parseInt(e.target.value) })}
+              onChange={(e) => setSettings({ ...settings, weekendPrice: parseInt(e.target.value) || 0 })}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>

@@ -22,8 +22,8 @@ export interface Room {
 export interface CreateRoomForm {
   cinema_id: number;
   room_name: string;
-  room_type?: string;
-  total_seats: number;
+  room_type: string;
+  total_seats?: number;
   status: 'active' | 'inactive';
 }
 

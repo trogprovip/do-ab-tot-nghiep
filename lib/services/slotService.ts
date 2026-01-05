@@ -57,6 +57,8 @@ export interface GetSlotsParams {
   search?: string;
   movie_id?: number;
   room_id?: number;
+  date?: string;
+  province_id?: number;
 }
 
 export const slotService = {

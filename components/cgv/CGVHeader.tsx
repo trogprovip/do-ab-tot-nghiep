@@ -39,13 +39,13 @@ export default function CGVHeader() {
   };
 
   const quickLinks = [
-    { href: '/cinemas', icon: <VideoCameraOutlined />, title: 'CGV CINEMAS', sub: 'TÌM RẠP GẦN BẠN' },
-    { href: '/showtimes', icon: <PlayCircleOutlined />, title: 'NOW SHOWING', sub: 'PHIM ĐANG CHIẾU' },
-    { href: '/special', icon: <StarOutlined />, title: 'CGV SPECIAL', sub: 'RẠP ĐẶC BIỆT' },
-    { href: '/rental', icon: <ShopOutlined />, title: 'GROUP SALES', sub: 'THUÊ RẠP & VÉ NHÓM' },
-    { href: '/contact', icon: <PhoneOutlined />, title: 'CONTACT CGV', sub: 'LIÊN HỆ CGV' },
-    { href: '/news-offers', icon: <GiftOutlined />, title: 'NEWS & OFFERS', sub: 'TIN MỚI & ƯU ĐÃI' },
-    { href: '/register', icon: <IdcardOutlined />, title: 'REGISTER', sub: 'ĐĂNG KÝ NGAY' },
+    { href: '/cgv/showtimes', icon: <VideoCameraOutlined />, title: 'CGV CINEMAS', sub: 'TÌM RẠP GẦN BẠN' },
+    { href: '/cgv/showtimes', icon: <PlayCircleOutlined />, title: 'NOW SHOWING', sub: 'PHIM ĐANG CHIẾU' },
+    { href: '/cgv', icon: <StarOutlined />, title: 'CGV SPECIAL', sub: 'RẠP ĐẶC BIỆT' },
+    { href: '/cgv', icon: <ShopOutlined />, title: 'GROUP SALES', sub: 'THUÊ RẠP & VÉ NHÓM' },
+    { href: '/cgv', icon: <PhoneOutlined />, title: 'CONTACT CGV', sub: 'LIÊN HỆ CGV' },
+    { href: '/cgv', icon: <GiftOutlined />, title: 'NEWS & OFFERS', sub: 'TIN MỚI & ƯU ĐÃI' },
+    { href: '/cgv', icon: <IdcardOutlined />, title: 'REGISTER', sub: 'ĐĂNG KÝ NGAY' },
   ];
 
   return (
@@ -125,7 +125,7 @@ export default function CGVHeader() {
                 <SearchOutlined className="text-xl" />
               </button>
 
-              <Link href="/booking">
+              <Link href="/cgv/showtimes">
                 <button className="bg-linear-to-r from-[#d90000] to-[#ff3333] text-white px-6 py-2.5 rounded-full font-bold shadow-[0_4px_15px_rgba(217,0,0,0.4)] border-b-2 border-[#8f0000] hover:shadow-[0_6px_20px_rgba(217,0,0,0.6)] hover:to-[#ff6666] hover:-translate-y-0.5 active:translate-y-0 active:border-b-0 transition-all duration-300 flex items-center gap-2 group relative overflow-hidden">
                   <div className="absolute inset-0 w-full h-full bg-linear-to-r from-transparent via-white/30 to-transparent translate-y-full group-hover:-translate-y-full transition-transform duration-700"></div>
                   <ShoppingCartOutlined className="text-lg animate-bounce-slow text-[#ffd700]" />

@@ -111,8 +111,6 @@ export default function SlotForm({ initialData, onSubmit, isEditing = false }: S
       const submitData = {
         movie_id: Number(formData.movie_id),
         room_id: Number(formData.room_id),
-        price: Number(formData.price),
-        empty_seats: Number(formData.empty_seats),
         show_time: formatForBackend(formData.show_time),
         end_time: formatForBackend(formData.end_time),
       };
@@ -163,16 +161,12 @@ export default function SlotForm({ initialData, onSubmit, isEditing = false }: S
           <label className="block text-sm font-medium mb-2">Giờ kết thúc *</label>
           <input type="datetime-local" name="end_time" value={formData.end_time || ''} onChange={handleChange} required className="w-full px-4 py-2 border rounded-lg" />
         </div>
+      </div>
 
-        <div>
-          <label className="block text-sm font-medium mb-2">Giá vé (VNĐ) *</label>
-          <input type="number" name="price" value={formData.price} onChange={handleChange} required className="w-full px-4 py-2 border rounded-lg" />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium mb-2">Số ghế trống *</label>
-          <input type="number" name="empty_seats" value={formData.empty_seats} onChange={handleChange} required className="w-full px-4 py-2 border rounded-lg" />
-        </div>
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <p className="text-sm text-blue-800">
+          ℹ️ <strong>Lưu ý:</strong> Giá vé và số ghế trống sẽ tự động được tính từ hệ thống dựa trên cấu hình giá và phòng chiếu đã chọn.
+        </p>
       </div>
 
       <div className="flex gap-4 pt-4 border-t mt-6">

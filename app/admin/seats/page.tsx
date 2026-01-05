@@ -43,8 +43,8 @@ export default function SeatsPage() {
 
   const [bulkForm, setBulkForm] = useState({
     room_id: '',
-    rows: 8,
-    seatsPerRow: 12,
+    rows: 1,
+    seats_per_row: 0,
     seat_type_id: '',
   });
 
@@ -277,7 +277,7 @@ export default function SeatsPage() {
                               : 'cursor-pointer hover:scale-110'
                           } transition-all flex items-center justify-center text-white text-xs font-bold shadow-md`}
                         >
-                          {seat.seat_number}
+                          {seat.seat_row}{seat.seat_number}
                         </div>
                         <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
                           {seat.seat_row}{seat.seat_number} - {seat.seattypes.type_name}
@@ -336,17 +336,24 @@ export default function SeatsPage() {
 
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Số Hàng (A-Z)
+                  Số Hàng
                 </label>
-                <input
-                  type="number"
-                  min="1"
-                  max="26"
+                <select
                   value={bulkForm.rows}
-                  onChange={(e) => setBulkForm({ ...bulkForm, rows: parseInt(e.target.value) })}
+                  onChange={(e) => setBulkForm({ ...bulkForm, rows: parseInt(e.target.value) || 0 })}
                   className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-700 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all"
                   required
-                />
+                >
+                  <option value="">-- Chọn số hàng --</option>
+                  {[...Array(26)].map((_, i) => {
+                    const letter = String.fromCharCode(65 + i); // A-Z
+                    return (
+                      <option key={i + 1} value={i + 1}>
+                        {i + 1} hàng ({letter} - {String.fromCharCode(65 + i)})
+                      </option>
+                    );
+                  })}
+                </select>
               </div>
 
               <div>
@@ -357,9 +364,9 @@ export default function SeatsPage() {
                   type="number"
                   min="1"
                   max="30"
-                  value={bulkForm.seatsPerRow}
+                  value={bulkForm.seats_per_row}
                   onChange={(e) =>
-                    setBulkForm({ ...bulkForm, seatsPerRow: parseInt(e.target.value) })
+                    setBulkForm({ ...bulkForm, seats_per_row: parseInt(e.target.value) || 0 })
                   }
                   className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-700 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all"
                   required
@@ -385,11 +392,6 @@ export default function SeatsPage() {
                 </select>
               </div>
 
-              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-                <p className="text-sm text-blue-800">
-                  <strong>Tổng ghế:</strong> {bulkForm.rows * bulkForm.seatsPerRow} ghế
-                </p>
-              </div>
 
               <div className="flex gap-3 pt-4">
                 <button

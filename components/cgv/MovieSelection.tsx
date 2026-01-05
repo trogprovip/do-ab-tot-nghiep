@@ -139,7 +139,7 @@ export default function MovieSelection() {
                         CHI TIẾT
                       </button>
                     </Link>
-                    <Link href={`/cgv/booking?movie=${movie.id}`}>
+                    <Link href="/cgv/showtimes">
                       <button className="w-full py-2.5 rounded-xl text-sm font-bold bg-gradient-to-r from-red-600 to-red-500 text-white shadow-md hover:shadow-lg hover:shadow-red-500/30 hover:to-red-400 transition-all duration-300 flex items-center justify-center gap-1 group/btn">
                         <ShoppingCartOutlined className="group-hover/btn:animate-bounce"/> MUA VÉ
                       </button>

@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    if (!body.cinema_id || !body.room_name || !body.total_seats) {
+    if (!body.cinema_id || !body.room_name || !body.room_type) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
@@ -93,8 +93,8 @@ export async function POST(request: NextRequest) {
       data: {
         cinema_id: parseInt(body.cinema_id),
         room_name: body.room_name,
-        room_type: body.room_type || null,
-        total_seats: parseInt(body.total_seats),
+        room_type: body.room_type,
+        total_seats: body.total_seats ? parseInt(body.total_seats) : 0,
         status: body.status || 'active',
         is_deleted: false,
       },
