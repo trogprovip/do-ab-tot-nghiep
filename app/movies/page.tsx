@@ -189,7 +189,7 @@ export default function MoviesPage() {
                                                     CHI TIẾT
                                                 </button>
                                             </Link>
-                                            <Link href="/cgv/showtimes" className="flex-1">
+                                            <Link href={`/cgv/movies/${movie.id}/showtimes`} className="flex-1">
                                                 {/* Nút Mua Vé: Rực sáng hơn khi hover cả card */}
                                                 <button className="w-full py-2.5 rounded-xl font-bold text-sm bg-red-600 text-white group-hover:bg-red-700 group-hover:shadow-lg transition-all uppercase flex items-center justify-center gap-1">
                                                     <ShoppingCartOutlined /> MUA VÉ

@@ -24,6 +24,7 @@ class ApiClient {
       });
     }
     
+    console.log('🌐 Full URL being called:', url.toString());
     return url.toString();
   }
 

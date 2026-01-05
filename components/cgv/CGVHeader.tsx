@@ -125,7 +125,7 @@ export default function CGVHeader() {
                 <SearchOutlined className="text-xl" />
               </button>
 
-              <Link href="/cgv/showtimes">
+              <Link href="/cgv/movies">
                 <button className="bg-linear-to-r from-[#d90000] to-[#ff3333] text-white px-6 py-2.5 rounded-full font-bold shadow-[0_4px_15px_rgba(217,0,0,0.4)] border-b-2 border-[#8f0000] hover:shadow-[0_6px_20px_rgba(217,0,0,0.6)] hover:to-[#ff6666] hover:-translate-y-0.5 active:translate-y-0 active:border-b-0 transition-all duration-300 flex items-center gap-2 group relative overflow-hidden">
                   <div className="absolute inset-0 w-full h-full bg-linear-to-r from-transparent via-white/30 to-transparent translate-y-full group-hover:-translate-y-full transition-transform duration-700"></div>
                   <ShoppingCartOutlined className="text-lg animate-bounce-slow text-[#ffd700]" />

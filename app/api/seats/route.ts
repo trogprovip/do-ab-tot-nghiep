@@ -8,10 +8,15 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const roomId = searchParams.get('room_id');
 
+    console.log('🔍 [Seats API] Request URL:', request.url);
+    console.log('🔍 [Seats API] room_id param:', roomId);
+
     const where: { room_id?: number } = {};
     if (roomId) {
       where.room_id = parseInt(roomId);
     }
+
+    console.log('🔍 [Seats API] Where clause:', where);
 
     const seats = await prisma.seats.findMany({
       where,
@@ -29,9 +34,15 @@ export async function GET(request: NextRequest) {
       ],
     });
 
+    console.log('🔍 [Seats API] Found seats:', seats.length);
+    console.log('🔍 [Seats API] First seat:', seats[0]);
+
     return NextResponse.json({
-      success: true,
-      data: seats,
+      content: seats,
+      totalElements: seats.length,
+      totalPages: 1,
+      size: seats.length,
+      number: 0,
     });
   } catch (error) {
     console.error('Error fetching seats:', error);

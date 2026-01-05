@@ -52,43 +52,91 @@ export default function SlotsPage() {
     }
   };
 
-  // --- SỬA LOGIC HIỂN THỊ TẠI ĐÂY ---
- const formatLocalDateTime = (dateString: string) => {
-  if (!dateString) return '-';
-  
-  // Khi dùng new Date(dateString), JavaScript sẽ tự động hiểu đây là giờ UTC 
-  // và các hàm getHours(), getDate()... sẽ tự động cộng thêm múi giờ máy tính (VN là +7)
-  const date = new Date(dateString);
-  
-  if (isNaN(date.getTime())) return '-';
+  // ✅ FORMAT ĐÚNG: HH:mm dd/MM/yyyy - Xử lý cả format từ backend
+  const formatLocalDateTime = (dateString: string) => {
+    if (!dateString) return '-';
+    
+    try {
+      let date: Date;
+      
+      if (typeof dateString === 'string') {
+        // Xử lý format "dd-MM-yyyy HH:mm:ss" hoặc "yyyy-MM-dd HH:mm:ss" từ backend
+        if (dateString.includes('-') && !dateString.includes('T')) {
+          const parts = dateString.split(' ');
+          const dateParts = parts[0].split('-');
+          const timeParts = parts[1]?.split(':') || ['00', '00', '00'];
+          
+          // Kiểm tra xem là dd-MM-yyyy hay yyyy-MM-dd
+          if (dateParts[0].length === 4) {
+            // yyyy-MM-dd HH:mm:ss
+            const [year, month, day] = dateParts;
+            const [hours, minutes] = timeParts;
+            date = new Date(Number(year), Number(month) - 1, Number(day), Number(hours), Number(minutes));
+          } else {
+            // dd-MM-yyyy HH:mm:ss
+            const [day, month, year] = dateParts;
+            const [hours, minutes] = timeParts;
+            date = new Date(Number(year), Number(month) - 1, Number(day), Number(hours), Number(minutes));
+          }
+        } else {
+          // ISO format hoặc format khác
+          date = new Date(dateString);
+        }
+      } else {
+        date = new Date(dateString);
+      }
+      
+      if (isNaN(date.getTime())) return '-';
 
-  // BỎ chữ "UTC" trong các hàm để lấy giờ đã cộng 7
-  const day = String(date.getDate()).padStart(2, '0');
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const year = date.getFullYear();
-  const hours = String(date.getHours()).padStart(2, '0');
-  const minutes = String(date.getMinutes()).padStart(2, '0');
+      // Lấy giờ địa phương
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const year = date.getFullYear();
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
 
-  return `${hours}:${minutes} ${day}/${month}/${year}`;
-};
+      // Format: HH:mm dd/MM/yyyy
+      return `${hours}:${minutes} ${day}/${month}/${year}`;
+    } catch (e) {
+      console.error('Error formatting date:', e);
+      return '-';
+    }
+  };
 
   const columns = [
-    { key: 'id', label: 'ID', width: '60px' },
+    { 
+      key: 'id', 
+      label: 'ID', 
+      width: '60px',
+      render: (value: number) => (
+        <span className="font-mono text-gray-600">#{value}</span>
+      )
+    },
     { 
       key: 'movies', 
       label: 'Phim',
       width: '250px',
-      render: (value: Slot['movies']) => value?.title || '-'
+      render: (value: Slot['movies']) => {
+        if (!value) return <span className="text-gray-400">-</span>;
+        return (
+          <div>
+            <div className="font-medium text-gray-900">{value.title}</div>
+            {value.duration && (
+              <div className="text-xs text-gray-500">{value.duration} phút</div>
+            )}
+          </div>
+        );
+      }
     },
     { 
       key: 'rooms', 
       label: 'Phòng chiếu',
       width: '200px',
       render: (value: Slot['rooms']) => {
-        if (!value) return '-';
+        if (!value) return <span className="text-gray-400">-</span>;
         return (
           <div>
-            <div className="font-medium">{value.room_name}</div>
+            <div className="font-medium text-gray-900">{value.room_name}</div>
             {value.cinemas && (
               <div className="text-xs text-gray-500">{value.cinemas.cinema_name}</div>
             )}
@@ -100,23 +148,56 @@ export default function SlotsPage() {
       key: 'show_time', 
       label: 'Giờ chiếu',
       width: '150px',
-      render: (value: string) => formatLocalDateTime(value)
+      render: (value: string) => (
+        <span className="text-sm font-medium text-blue-600">
+          {formatLocalDateTime(value)}
+        </span>
+      )
+    },
+    { 
+      key: 'end_time', 
+      label: 'Giờ kết thúc',
+      width: '150px',
+      render: (value: string) => (
+        <span className="text-sm text-gray-600">
+          {formatLocalDateTime(value)}
+        </span>
+      )
     },
     { 
       key: 'price', 
       label: 'Giá vé',
       width: '120px',
-      render: (value: number) => `${Number(value || 0).toLocaleString('vi-VN')} đ`
+      render: (value: number) => (
+        <span className="font-semibold text-green-600">
+          {Number(value || 0).toLocaleString('vi-VN')} đ
+        </span>
+      )
     },
-    { key: 'empty_seats', label: 'Ghế trống', width: '100px' },
+    { 
+      key: 'empty_seats', 
+      label: 'Ghế trống', 
+      width: '100px',
+      render: (value: number) => {
+        const isEmpty = value === 0;
+        return (
+          <span className={`font-medium ${isEmpty ? 'text-red-600' : 'text-green-600'}`}>
+            {value}
+          </span>
+        );
+      }
+    },
   ];
 
   return (
-    <div>
+    <div className="p-6">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Quản lý Suất chiếu</h1>
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Quản lý Suất chiếu</h1>
+          <p className="text-gray-600 mt-1">Danh sách tất cả suất chiếu phim</p>
+        </div>
         <Link href="/admin/slots/create">
-          <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+          <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm">
             <Plus className="w-4 h-4" />
             Thêm suất chiếu
           </button>
@@ -129,7 +210,7 @@ export default function SlotsPage() {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
               type="text"
-              placeholder="Tìm kiếm suất chiếu..."
+              placeholder="Tìm kiếm theo tên phim, phòng chiếu..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -139,14 +220,47 @@ export default function SlotsPage() {
       </div>
 
       {loading ? (
-        <div className="text-center py-8">Đang tải...</div>
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Đang tải danh sách suất chiếu...</p>
+          </div>
+        </div>
+      ) : slots.length === 0 ? (
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
+          <div className="text-gray-400 mb-4">
+            <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+          </div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Chưa có suất chiếu nào</h3>
+          <p className="text-gray-500 mb-4">
+            {searchTerm ? 'Không tìm thấy suất chiếu phù hợp' : 'Hãy thêm suất chiếu đầu tiên'}
+          </p>
+          {!searchTerm && (
+            <Link href="/admin/slots/create">
+              <button className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                <Plus className="w-5 h-5" />
+                Thêm suất chiếu mới
+              </button>
+            </Link>
+          )}
+        </div>
       ) : (
-        <DataTable
-          columns={columns}
-          data={slots}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-        />
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+          <DataTable
+            columns={columns}
+            data={slots}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        </div>
+      )}
+
+      {!loading && slots.length > 0 && (
+        <div className="mt-4 text-sm text-gray-600 text-center">
+          Hiển thị {slots.length} suất chiếu
+        </div>
       )}
     </div>
   );

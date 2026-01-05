@@ -2,7 +2,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
 import { CalendarOutlined, EnvironmentOutlined, ClockCircleOutlined } from '@ant-design/icons';
 import { Spin } from 'antd';
 import CGVHeader from '@/components/cgv/CGVHeader';
@@ -46,19 +45,26 @@ interface CinemaGroup {
   slots: SlotWithDetails[];
 }
 
-export default function ShowtimesPage() {
-  const searchParams = useSearchParams();
+export default function MovieShowtimesPage({ params }: { params: Promise<{ id: string }> }) {
+  const [movieId, setMovieId] = useState<number | null>(null);
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [selectedProvince, setSelectedProvince] = useState<number | null>(null);
-  const [selectedMovieId, setSelectedMovieId] = useState<number | null>(null);
   const [selectedMovie, setSelectedMovie] = useState<any>(null);
   const [provinces, setProvinces] = useState<Province[]>([]);
   const [cinemaGroups, setCinemaGroups] = useState<CinemaGroup[]>([]);
   const [loading, setLoading] = useState(false);
   const [dates, setDates] = useState<Date[]>([]);
 
+  useEffect(() => {
+    params.then(p => {
+      const id = parseInt(p.id);
+      setMovieId(id);
+      console.log('🔍 Movie ID from URL:', id);
+      fetchMovie(id);
+    });
+  }, [params]);
+
   const generateDates = () => {
-    // Bắt đầu từ ngày hiện tại
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
@@ -69,8 +75,6 @@ export default function ShowtimesPage() {
       dateArray.push(date);
     }
     setDates(dateArray);
-    
-    // Mặc định chọn ngày hôm nay
     setSelectedDate(formatDateForAPI(today));
   };
 
@@ -86,6 +90,19 @@ export default function ShowtimesPage() {
     }
   };
 
+  const fetchMovie = async (id: number) => {
+    try {
+      console.log('🔍 Fetching movie with ID:', id);
+      const response = await fetch(`/api/movies/${id}`);
+      console.log('🔍 Movie API response status:', response.status);
+      const movieData = await response.json();
+      console.log('🔍 Movie API response:', movieData);
+      setSelectedMovie(movieData);
+    } catch (error) {
+      console.error('Error fetching movie:', error);
+    }
+  };
+
   const fetchSlots = async () => {
     try {
       setLoading(true);
@@ -96,16 +113,13 @@ export default function ShowtimesPage() {
       if (selectedProvince) {
         params.province_id = selectedProvince;
       }
-      if (selectedMovieId) {
-        params.movie_id = selectedMovieId;
+      if (movieId) {
+        params.movie_id = movieId;
       }
       const response = await slotService.getSlots(params);
       console.log('Slots API Response:', JSON.stringify(response, null, 2));
       console.log('Params sent:', params);
-      console.log('Raw content length:', response.content.length);
-      console.log('First slot data:', response.content[0]);
       groupSlotsByCinema(response.content as SlotWithDetails[]);
-      console.log('Cinema groups after grouping:', cinemaGroups.length);
     } catch (error) {
       console.error('Error fetching slots:', error);
     } finally {
@@ -113,40 +127,17 @@ export default function ShowtimesPage() {
     }
   };
 
-  const fetchMovie = async (movieId: number) => {
-    try {
-      console.log('🔍 Fetching movie with ID:', movieId);
-      const response = await fetch(`/api/movies/${movieId}`);
-      console.log('🔍 Movie API response status:', response.status);
-      const movieData = await response.json();
-      console.log('🔍 Movie API response:', movieData);
-      setSelectedMovie(movieData);
-    } catch (error) {
-      console.error('Error fetching movie:', error);
-    }
-  };
-
   useEffect(() => {
     generateDates();
     fetchProvinces();
-    
-    // Lấy movie_id từ URL
-    const movieIdParam = searchParams.get('movie_id');
-    if (movieIdParam) {
-      const movieId = parseInt(movieIdParam);
-      setSelectedMovieId(movieId);
-      console.log('🔍 Movie ID from URL:', movieIdParam);
-      fetchMovie(movieId);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
-    if (selectedDate) {
+    if (selectedDate && movieId) {
       fetchSlots();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedDate, selectedProvince, selectedMovieId]);
+  }, [selectedDate, selectedProvince, movieId]);
 
   const groupSlotsByCinema = (slotsData: SlotWithDetails[]) => {
     const grouped: { [key: number]: CinemaGroup } = {};
@@ -171,18 +162,14 @@ export default function ShowtimesPage() {
   };
 
   const formatDateForAPI = (date: Date): string => {
-    console.log('🔍 Input date:', date);
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
-    const result = `${year}-${month}-${day}`;
-    console.log('🔍 Formatted date:', result);
-    return result;
+    return `${year}-${month}-${day}`;
   };
 
   const formatDateDisplay = (date: Date): string => {
-    const day = String(date.getDate()).padStart(2, '0');
-    return day;
+    return String(date.getDate()).padStart(2, '0');
   };
 
   const getDayName = (date: Date): string => {
@@ -234,11 +221,7 @@ export default function ShowtimesPage() {
                   </div>
                   <p className="text-gray-400 mt-2 line-clamp-2">{selectedMovie.description || 'Chọn suất chiếu bên dưới để bắt đầu trải nghiệm.'}</p>
                 </div>
-                <div className="text-right">
-                  <p className="text-sm text-gray-400 mb-1">Giá vé từ</p>
-                  <p className="text-2xl font-bold text-yellow-400">{selectedMovie.base_price || '80.000'} đ</p>
-                </div>
-              </div>
+                              </div>
             </div>
           </div>
         )}
@@ -258,7 +241,7 @@ export default function ShowtimesPage() {
                   <button
                     key={index}
                     onClick={() => setSelectedDate(dateStr)}
-                    className={`flex-shrink-0 min-w-[60px] px-3 py-2 rounded-lg border-2 transition-all ${
+                    className={`shrink-0 min-w-[60px] px-3 py-2 rounded-lg border-2 transition-all ${
                       isSelected
                         ? 'bg-red-600 border-red-600 text-white'
                         : 'bg-white border-gray-200 text-gray-700 hover:border-red-300'
@@ -316,13 +299,11 @@ export default function ShowtimesPage() {
             <div className="space-y-6">
               {cinemaGroups.map((cinema) => (
                 <div key={cinema.cinema_id} className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
-                  {/* Cinema Header */}
                   <div className="bg-gradient-to-r from-gray-800 to-gray-700 text-white p-4">
                     <h3 className="font-bold text-lg">{cinema.cinema_name}</h3>
                     <p className="text-sm text-gray-300 mt-1">{cinema.address}</p>
                   </div>
 
-                  {/* Showtimes */}
                   <div className="p-4">
                     <div className="flex items-center gap-2 mb-3">
                       <span className="bg-gray-800 text-white px-3 py-1 rounded text-sm font-bold">

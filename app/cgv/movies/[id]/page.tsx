@@ -160,7 +160,7 @@ export default function MovieDetailPage() {
                   <div className="bg-blue-600 text-white px-4 py-2 text-xs font-bold cursor-pointer hover:bg-blue-700 transition-colors">
                     Like 12
                   </div>
-                  <Link href="/cgv/showtimes">
+                  <Link href={`/cgv/movies/${movie.id}/showtimes`}>
                     <button className="bg-red-600 text-white px-6 py-2 font-bold hover:bg-red-700 transition-colors flex items-center gap-2">
                       <ShoppingCartOutlined />
                       MUA VÉ

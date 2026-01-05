@@ -92,8 +92,10 @@ export default function SeatsPage() {
     try {
       setLoading(true);
       const response = await axios.get(`/api/seats?room_id=${roomId}`);
-      if (response.data.success) {
-        setSeats(response.data.data);
+      console.log('🔍 Seats response:', response.data);
+      // API trả về {content: [...], totalElements: ...}
+      if (response.data.content) {
+        setSeats(response.data.content);
       }
     } catch (error) {
       console.error('Error fetching seats:', error);
@@ -164,8 +166,14 @@ export default function SeatsPage() {
 
   const getSeatColor = (seatType: string) => {
     const name = seatType.toLowerCase();
+    // Phải kiểm tra provip trước vì nó chứa "vip"
+    if (name.includes('provip') || name.includes('pro vip')) return 'bg-orange-500';
     if (name.includes('vip')) return 'bg-yellow-500';
     if (name.includes('couple') || name.includes('đôi')) return 'bg-pink-500';
+    if (name.includes('premium') || name.includes('cao cấp')) return 'bg-purple-500';
+    if (name.includes('deluxe') || name.includes('cao cấp')) return 'bg-indigo-500';
+    if (name.includes('economy') || name.includes('tiết kiệm')) return 'bg-green-500';
+    if (name.includes('standard') || name.includes('tiêu chuẩn')) return 'bg-cyan-500';
     return 'bg-blue-500';
   };
 

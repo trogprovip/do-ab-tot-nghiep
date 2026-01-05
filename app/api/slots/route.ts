@@ -5,6 +5,9 @@ import { prisma } from '@/lib/prisma';
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
+    console.log('🔍 API Request URL:', request.url);
+    console.log('🔍 API Search params:', Object.fromEntries(searchParams.entries()));
+    
     const page = parseInt(searchParams.get('page') || '0');
     const size = parseInt(searchParams.get('size') || '10');
     const search = searchParams.get('search') || '';
@@ -12,6 +15,8 @@ export async function GET(request: NextRequest) {
     const room_id = searchParams.get('room_id');
     const date = searchParams.get('date');
     const province_id = searchParams.get('province_id');
+    
+    console.log('🔍 API Parsed params:', { page, size, search, movie_id, room_id, date, province_id });
 
     const skip = page * size;
 
@@ -55,6 +60,8 @@ export async function GET(request: NextRequest) {
       ];
     }
 
+    console.log('🔍 Final where clause:', JSON.stringify(where, null, 2));
+
     const [slots, total] = await Promise.all([
       prisma.slots.findMany({
         where,
@@ -87,6 +94,8 @@ export async function GET(request: NextRequest) {
       prisma.slots.count({ where }),
     ]);
 
+    console.log('🔍 Query result:', { slotsCount: slots.length, total });
+
     return NextResponse.json({
       content: slots,
       totalElements: total,
@@ -106,8 +115,13 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
+    console.log('🔍 Request body:', body);
+    console.log('🔍 movieId:', body.movieId);
+    console.log('🔍 roomId:', body.roomId);
+    console.log('🔍 showTime:', body.showTime);
+    console.log('🔍 endTime:', body.endTime);
 
-    if (!body.movie_id || !body.room_id || !body.show_time || !body.end_time) {
+    if (!body.movieId || !body.roomId || !body.showTime || !body.endTime) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
@@ -117,7 +131,7 @@ export async function POST(request: NextRequest) {
     // Đếm số ghế thực tế trong phòng (chỉ đếm ghế active)
     const seatCount = await prisma.seats.count({
       where: {
-        room_id: parseInt(body.room_id),
+        room_id: parseInt(body.roomId), // ✅ Dùng roomId từ frontend
         status: 'active', // Chỉ đếm ghế hoạt động, bỏ ghế hỏng
       },
     });
@@ -138,7 +152,10 @@ export async function POST(request: NextRequest) {
       if (priceSetting && priceSetting.config_data) {
         const config = priceSetting.config_data as any;
         // Kiểm tra ngày chiếu là ngày thường hay cuối tuần
-        const showDate = new Date(body.show_time);
+        // Parse showTime string: "2026-01-07 19:00:00"
+        const parts = body.showTime.split(' ');
+        const [year, month, day] = parts[0].split('-');
+        const showDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
         const dayOfWeek = showDate.getDay(); // 0 = Sunday, 6 = Saturday
         
         if (dayOfWeek === 0 || dayOfWeek === 6) {
@@ -153,12 +170,40 @@ export async function POST(request: NextRequest) {
       console.log('Using default ticket price:', ticketPrice);
     }
 
+    // Convert format để đồng bộ với Spring Boot: yyyy-MM-dd HH:mm:ss
+    // Input: "2026-01-07 19:00:00" (đã là local time string)
+    const formatDateTimeForDB = (dateString: string) => {
+      console.log('🔍 Input date string:', dateString);
+      
+      // ✅ FIX: Không dùng new Date() vì nó sẽ parse theo UTC
+      // Chỉ parse string thành các phần và tạo Date object với local timezone
+      const parts = dateString.split(' ');
+      const [year, month, day] = parts[0].split('-');
+      const [hours, minutes, seconds] = parts[1].split(':');
+      
+      // Tạo Date object với local timezone (Vietnam)
+      const result = new Date(
+        parseInt(year),
+        parseInt(month) - 1, // Month is 0-indexed
+        parseInt(day),
+        parseInt(hours),
+        parseInt(minutes),
+        parseInt(seconds || '0')
+      );
+      
+      console.log('🔍 Formatted for DB:', result);
+      console.log('🔍 DB ISO:', result.toISOString());
+      console.log('🔍 DB Local:', result.toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' }));
+      
+      return result;
+    };
+
     const newSlot = await prisma.slots.create({
       data: {
-        movie_id: parseInt(body.movie_id),
-        room_id: parseInt(body.room_id),
-        show_time: new Date(body.show_time),
-        end_time: new Date(body.end_time),
+        movie_id: parseInt(body.movieId), // ✅ Nhận movieId từ frontend
+        room_id: parseInt(body.roomId),   // ✅ Nhận roomId từ frontend
+        show_time: formatDateTimeForDB(body.showTime), // ✅ Nhận showTime từ frontend
+        end_time: formatDateTimeForDB(body.endTime),   // ✅ Nhận endTime từ frontend
         price: ticketPrice,
         empty_seats: seatCount, // Số ghế thực tế đã tạo
         create_at: new Date(),

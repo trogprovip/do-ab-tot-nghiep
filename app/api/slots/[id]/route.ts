@@ -19,6 +19,8 @@ export async function GET(
           select: {
             id: true,
             title: true,
+            poster_url: true,
+            duration: true,
           },
         },
         rooms: {
@@ -60,6 +62,12 @@ export async function PUT(
     const { id: idParam } = await params;
     const id = parseInt(idParam);
     const body = await request.json();
+    
+    console.log('🔍 Update Request body:', body);
+    console.log('🔍 Update movieId:', body.movieId);
+    console.log('🔍 Update roomId:', body.roomId);
+    console.log('🔍 Update showTime:', body.showTime);
+    console.log('🔍 Update endTime:', body.endTime);
 
     const existingSlot = await prisma.slots.findFirst({
       where: {
@@ -75,27 +83,46 @@ export async function PUT(
       );
     }
 
+    // Convert format để đồng bộ với Spring Boot: yyyy-MM-dd HH:mm:ss
+    const formatDateTimeForDB = (dateString: string) => {
+      console.log('🔍 Input date string:', dateString);
+      
+      // Parse string thành các phần và tạo Date object với local timezone
+      const parts = dateString.split(' ');
+      const [year, month, day] = parts[0].split('-');
+      const [hours, minutes, seconds] = parts[1].split(':');
+      
+      // Tạo Date object với local timezone (Vietnam)
+      const result = new Date(
+        parseInt(year),
+        parseInt(month) - 1,
+        parseInt(day),
+        parseInt(hours),
+        parseInt(minutes),
+        parseInt(seconds || '0')
+      );
+      
+      console.log('🔍 Formatted for DB:', result);
+      return result;
+    };
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const updateData: any = {};
 
-    if (body.movie_id !== undefined) {
-      updateData.movie_id = parseInt(body.movie_id);
+    if (body.movieId !== undefined) {
+      updateData.movie_id = parseInt(body.movieId);
     }
-    if (body.room_id !== undefined) {
-      updateData.room_id = parseInt(body.room_id);
+    if (body.roomId !== undefined) {
+      updateData.room_id = parseInt(body.roomId);
     }
-    if (body.show_time !== undefined) {
-      updateData.show_time = new Date(body.show_time);
+    if (body.showTime !== undefined) {
+      updateData.show_time = formatDateTimeForDB(body.showTime);
     }
-    if (body.end_time !== undefined) {
-      updateData.end_time = new Date(body.end_time);
+    if (body.endTime !== undefined) {
+      updateData.end_time = formatDateTimeForDB(body.endTime);
     }
-    if (body.price !== undefined) {
-      updateData.price = parseFloat(body.price);
-    }
-    if (body.empty_seats !== undefined) {
-      updateData.empty_seats = parseInt(body.empty_seats);
-    }
+
+    console.log('🔍 Update data:', updateData);
 
     await prisma.slots.update({
       where: { id },
