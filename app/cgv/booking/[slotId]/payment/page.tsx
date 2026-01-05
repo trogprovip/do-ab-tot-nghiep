@@ -286,8 +286,8 @@ export default function PaymentPage({ params }: { params: Promise<{ slotId: stri
               <div className="sticky top-6">
                   <Card 
                   className="shadow-2xl border-none overflow-hidden" 
-                  styles={{ body: { padding: 0 } }}
->
+                    styles={{ body: { padding: 0 } }}
+                    >
                   <div className="bg-black p-4 text-white">
                     <Title level={5} className="text-white m-0 uppercase tracking-widest text-center">Tóm tắt đơn hàng</Title>
                   </div>

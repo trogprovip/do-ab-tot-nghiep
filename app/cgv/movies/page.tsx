@@ -5,14 +5,20 @@ import { Spin, Empty, Pagination } from 'antd';
 import { 
   PlayCircleFilled, 
   ShoppingCartOutlined, 
-  StarFilled 
+  StarFilled,
+  ClockCircleOutlined
 } from '@ant-design/icons';
 import Link from 'next/link';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { movieService, Movie } from '@/lib/services/movieService';
 import CGVHeader from '@/components/cgv/CGVHeader';
 import CGVFooter from '@/components/cgv/CGVFooter';
 
 export default function AllMoviesPage() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const status = searchParams.get('status') || 'all';
+  
   const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -23,7 +29,7 @@ export default function AllMoviesPage() {
 
   useEffect(() => {
     fetchMovies();
-  }, [currentPage]);
+  }, [currentPage, status]);
 
   const fetchMovies = async () => {
     try {
@@ -31,6 +37,7 @@ export default function AllMoviesPage() {
       const response = await movieService.getMovies({
         page: currentPage,
         size: pageSize,
+        status: status === 'all' ? undefined : status,
       });
       setMovies(response.content);
       setTotalPages(response.totalPages);
@@ -40,6 +47,15 @@ export default function AllMoviesPage() {
       setError('Không thể tải danh sách phim');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleTabChange = (key: string) => {
+    setCurrentPage(0);
+    if (key === 'all') {
+      router.push('/cgv/movies');
+    } else {
+      router.push(`/cgv/movies?status=${key}`);
     }
   };
 
@@ -64,6 +80,43 @@ export default function AllMoviesPage() {
 
         {/* Content */}
         <div className="container mx-auto px-4 py-12">
+          {/* Filter Tabs */}
+          <div className="mb-8 flex gap-3 flex-wrap">
+            <button
+              onClick={() => handleTabChange('all')}
+              className={`px-6 py-3 rounded-full font-bold transition-all duration-300 ${
+                status === 'all'
+                  ? 'bg-red-600 text-white shadow-lg scale-105'
+                  : 'bg-white text-gray-700 hover:bg-red-50 border-2 border-gray-200'
+              }`}
+            >
+              <StarFilled className="mr-2" />
+              Tất Cả Phim
+            </button>
+            <button
+              onClick={() => handleTabChange('now_showing')}
+              className={`px-6 py-3 rounded-full font-bold transition-all duration-300 ${
+                status === 'now_showing'
+                  ? 'bg-red-600 text-white shadow-lg scale-105'
+                  : 'bg-white text-gray-700 hover:bg-red-50 border-2 border-gray-200'
+              }`}
+            >
+              <PlayCircleFilled className="mr-2" />
+              Phim Đang Chiếu
+            </button>
+            <button
+              onClick={() => handleTabChange('coming_soon')}
+              className={`px-6 py-3 rounded-full font-bold transition-all duration-300 ${
+                status === 'coming_soon'
+                  ? 'bg-red-600 text-white shadow-lg scale-105'
+                  : 'bg-white text-gray-700 hover:bg-red-50 border-2 border-gray-200'
+              }`}
+            >
+              <ClockCircleOutlined className="mr-2" />
+              Phim Sắp Chiếu
+            </button>
+          </div>
+
           {/* Loading State */}
           {loading && (
             <div className="flex flex-col justify-center items-center py-20 gap-4">

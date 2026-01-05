@@ -53,7 +53,7 @@ export default function CGVHeader() {
     <header className="font-sans relative z-50">
       
       {/* ================= 1. TOP BAR (Sẽ bị cuộn đi) ================= */}
-      <div className="bg-gradient-to-r from-[#8f0000] to-[#b30000] text-white text-xs md:text-sm py-1.5 border-b border-yellow-600/30">
+      <div className="bg-gradient-to-r from-[#990000] via-[#b30000] to-[#cc0000] text-white text-xs md:text-sm py-2 border-b border-yellow-500/40 shadow-lg">
         <div className="container mx-auto px-4 flex justify-between items-center">
           <div className="flex gap-4 font-medium">
             <Link href="/news" className="hover:text-[#ffd700] transition-colors flex items-center gap-1 group">
@@ -96,11 +96,11 @@ export default function CGVHeader() {
 
       {/* ================= 2. MAIN NAVIGATION (SẼ DÍNH LẠI - STICKY) ================= */}
       {/* Thêm class 'sticky top-0' vào đây */}
-      <div className={`bg-[#fffdf9]/95 backdrop-blur-md border-b-2 border-[#c4a000] z-50 transition-all duration-300 
-                      sticky top-0 ${scrolled ? 'shadow-2xl shadow-red-900/20 py-2' : 'py-3 md:py-4'}`}>
+      <div className={`bg-gradient-to-r from-[#fffefb] via-[#fffdf9] to-[#fffefb] backdrop-blur-md border-b-2 border-[#d4af37] z-50 transition-all duration-300 
+                      sticky top-0 ${scrolled ? 'shadow-2xl shadow-red-900/30 py-2' : 'py-3 md:py-4'}`}>
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center">
-            
+                         
             {/* LOGO */}
             <Link href="/" className="group flex items-center gap-1">
                <span className="text-[#d90000] font-black text-4xl tracking-tighter hover:scale-105 transition-transform cursor-pointer drop-shadow-sm">CGV</span>
@@ -109,7 +109,40 @@ export default function CGVHeader() {
 
             {/* DESKTOP MENU */}
             <nav className="hidden lg:flex items-center gap-8 font-extrabold text-[#4a4a4a] tracking-wide">
-              {['PHIM', 'RẠP CGV', 'THÀNH VIÊN', 'CULTUREPLEX'].map((item, idx) => (
+              {/* PHIM Menu with Dropdown */}
+              <div className="group relative cursor-pointer py-2">
+                <span className="group-hover:text-[#d90000] transition-colors duration-300 flex items-center gap-1">
+                  PHIM <DownOutlined className="text-[10px] text-yellow-600 opacity-70 group-hover:opacity-100 transition-opacity" />
+                </span>
+                <span className="absolute bottom-0 left-0 w-0 h-[3px] bg-[#d90000] transition-all duration-300 group-hover:w-full rounded-full shadow-[0_2px_10px_rgba(217,0,0,0.3)]"></span>
+                
+                {/* Dropdown Menu */}
+                <div className="absolute top-full left-0 mt-2 w-56 bg-white rounded-lg shadow-2xl border-2 border-[#d90000]/20 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
+                  <div className="py-2">
+                    <Link href="/cgv/movies?status=now_showing" className="block px-6 py-3 hover:bg-red-50 transition-colors border-l-4 border-transparent hover:border-[#d90000]">
+                      <div className="flex items-center gap-3">
+                        <PlayCircleOutlined className="text-[#d90000] text-xl" />
+                        <div>
+                          <div className="font-bold text-[#2b2b2b] text-sm">Phim Đang Chiếu</div>
+                          <div className="text-xs text-gray-500">Now Showing</div>
+                        </div>
+                      </div>
+                    </Link>
+                    <Link href="/cgv/movies?status=coming_soon" className="block px-6 py-3 hover:bg-red-50 transition-colors border-l-4 border-transparent hover:border-[#d90000]">
+                      <div className="flex items-center gap-3">
+                        <StarOutlined className="text-[#ffd700] text-xl" />
+                        <div>
+                          <div className="font-bold text-[#2b2b2b] text-sm">Phim Sắp Chiếu</div>
+                          <div className="text-xs text-gray-500">Coming Soon</div>
+                        </div>
+                      </div>
+                    </Link>
+                  </div>
+                </div>
+              </div>
+
+              {/* Other Menu Items */}
+              {['RẠP CGV', 'THÀNH VIÊN', 'CULTUREPLEX'].map((item, idx) => (
                 <div key={idx} className="group relative cursor-pointer py-2">
                   <span className="group-hover:text-[#d90000] transition-colors duration-300 flex items-center gap-1">
                     {item} <DownOutlined className="text-[10px] text-yellow-600 opacity-70 group-hover:opacity-100 transition-opacity" />
@@ -142,7 +175,7 @@ export default function CGVHeader() {
       </div>
 
       {/* ================= 3. QUICK LINKS BAR (Sẽ bị cuộn đi) ================= */}
-      <div className="relative bg-gradient-to-b from-[#fffbea] to-[#f8f1d7] py-6 border-t-[3px] border-[#8f0000] border-b-[3px] border-[#c4a000] overflow-hidden shadow-inner">
+      <div className="relative bg-gradient-to-b from-[#fff8f0] via-[#fff5e6] to-[#fef3e0] py-6 border-t-[3px] border-[#990000] border-b-[3px] border-[#d4af37] overflow-hidden shadow-lg">
         {/* Pattern trang trí */}
         <div className="absolute top-0 left-0 w-full h-3 bg-red-900/10 bg-repeat-x"></div>
         <div className="absolute inset-0 opacity-[0.07] pointer-events-none" style={{ backgroundImage: 'radial-gradient(#8f0000 1.5px, transparent 1.5px)', backgroundSize: '24px 24px' }}></div>
