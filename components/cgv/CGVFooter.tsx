@@ -14,16 +14,7 @@ import {
 import Link from 'next/link';
 
 export default function CGVFooter() {
-  const brands = [
-    { name: 'IMAX', color: 'hover:text-blue-600' },
-    { name: 'STARIUM', color: 'hover:text-red-600' },
-    { name: 'GOLDCLASS', color: 'hover:text-yellow-600' },
-    { name: 'SWEETBOX', color: 'hover:text-pink-500' },
-    { name: 'PREMIUM CINEMA', color: 'hover:text-purple-600' },
-    { name: 'CINE & FORET', color: 'hover:text-green-600' },
-    { name: 'CINE & LIVING', color: 'hover:text-orange-500' },
-    { name: '4DX', color: 'hover:text-gray-800' },
-  ];
+
 
   return (
     <footer className="relative bg-[#fdfcf0] pt-10 text-gray-700 overflow-hidden font-sans border-t-4 border-red-600">
@@ -33,18 +24,6 @@ export default function CGVFooter() {
            style={{ backgroundImage: 'radial-gradient(#d90000 1px, transparent 1px)', backgroundSize: '24px 24px' }}>
       </div>
 
-      {/* Cinema Brands Strip - Dải thương hiệu rạp */}
-      <div className="relative z-10 container mx-auto px-4 mb-10">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-          <div className="flex flex-wrap justify-center items-center gap-x-8 gap-y-4 text-sm md:text-base font-black tracking-widest text-gray-300 select-none">
-            {brands.map((brand, index) => (
-              <span key={index} className={`cursor-pointer transition-colors duration-300 ${brand.color} hover:scale-110 transform inline-block`}>
-                {brand.name}
-              </span>
-            ))}
-          </div>
-        </div>
-      </div>
 
       {/* Main Footer Content */}
       <div className="relative z-10 container mx-auto px-4 pb-12">

@@ -4,10 +4,10 @@ import { prisma } from '@/lib/prisma';
 
 export async function GET(
   request: NextRequest,
-  context: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await context.params;
+    const { id } = await params;
     const cinemaId = parseInt(id);
     
     if (isNaN(cinemaId)) {
@@ -21,6 +21,13 @@ export async function GET(
       where: {
         id: cinemaId,
         is_deleted: false,
+      },
+      include: {
+        provinces: {
+          select: {
+            province_name: true,
+          },
+        },
       },
     });
 

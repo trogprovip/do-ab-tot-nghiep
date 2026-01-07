@@ -39,6 +39,13 @@ export async function GET(request: NextRequest) {
       skip,
       take: size,
       orderBy: { id: 'desc' },
+      include: {
+        provinces: {
+          select: {
+            province_name: true,
+          },
+        },
+      },
     });
 
     return NextResponse.json({

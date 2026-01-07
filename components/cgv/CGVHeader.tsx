@@ -39,12 +39,12 @@ export default function CGVHeader() {
   };
 
   const quickLinks = [
-    { href: '/cgv/showtimes', icon: <VideoCameraOutlined />, title: 'CGV CINEMAS', sub: 'TÌM RẠP GẦN BẠN' },
-    { href: '/cgv/showtimes', icon: <PlayCircleOutlined />, title: 'NOW SHOWING', sub: 'PHIM ĐANG CHIẾU' },
+    { href: '/cgv/cinemas', icon: <VideoCameraOutlined />, title: 'CGV CINEMAS', sub: 'TÌM RẠP GẦN BẠN' },
+    { href: '/cgv/movies?status=now_showing', icon: <PlayCircleOutlined />, title: 'NOW SHOWING', sub: 'PHIM ĐANG CHIẾU' },
     { href: '/cgv', icon: <StarOutlined />, title: 'CGV SPECIAL', sub: 'RẠP ĐẶC BIỆT' },
     { href: '/cgv', icon: <ShopOutlined />, title: 'GROUP SALES', sub: 'THUÊ RẠP & VÉ NHÓM' },
     { href: '/cgv', icon: <PhoneOutlined />, title: 'CONTACT CGV', sub: 'LIÊN HỆ CGV' },
-    { href: '/cgv', icon: <GiftOutlined />, title: 'NEWS & OFFERS', sub: 'TIN MỚI & ƯU ĐÃI' },
+    { href: '/news', icon: <GiftOutlined />, title: 'NEWS & OFFERS', sub: 'TIN MỚI & ƯU ĐÃI' },
     { href: '/cgv', icon: <IdcardOutlined />, title: 'REGISTER', sub: 'ĐĂNG KÝ NGAY' },
   ];
 
@@ -117,32 +117,51 @@ export default function CGVHeader() {
                 <span className="absolute bottom-0 left-0 w-0 h-[3px] bg-[#d90000] transition-all duration-300 group-hover:w-full rounded-full shadow-[0_2px_10px_rgba(217,0,0,0.3)]"></span>
                 
                 {/* Dropdown Menu */}
-                <div className="absolute top-full left-0 mt-2 w-56 bg-white rounded-lg shadow-2xl border-2 border-[#d90000]/20 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
-                  <div className="py-2">
-                    <Link href="/cgv/movies?status=now_showing" className="block px-6 py-3 hover:bg-red-50 transition-colors border-l-4 border-transparent hover:border-[#d90000]">
-                      <div className="flex items-center gap-3">
-                        <PlayCircleOutlined className="text-[#d90000] text-xl" />
-                        <div>
-                          <div className="font-bold text-[#2b2b2b] text-sm">Phim Đang Chiếu</div>
-                          <div className="text-xs text-gray-500">Now Showing</div>
-                        </div>
-                      </div>
-                    </Link>
-                    <Link href="/cgv/movies?status=coming_soon" className="block px-6 py-3 hover:bg-red-50 transition-colors border-l-4 border-transparent hover:border-[#d90000]">
-                      <div className="flex items-center gap-3">
-                        <StarOutlined className="text-[#ffd700] text-xl" />
-                        <div>
-                          <div className="font-bold text-[#2b2b2b] text-sm">Phim Sắp Chiếu</div>
-                          <div className="text-xs text-gray-500">Coming Soon</div>
-                        </div>
-                      </div>
-                    </Link>
-                  </div>
-                </div>
+<div className="absolute top-[calc(100%-5px)] left-0 pt-4 w-64 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 transform origin-top group-hover:translate-y-0 translate-y-2">
+  {/* Mũi tên trỏ lên (Triangle Indicator) */}
+  <div className="absolute top-2 left-6 w-4 h-4 bg-white rotate-45 border-t border-l border-black/5 shadow-[-3px_-3px_5px_rgba(0,0,0,0.02)]"></div>
+  
+  <div className="bg-white/95 backdrop-blur-xl rounded-[1.5rem] shadow-[0_20px_40px_rgba(0,0,0,0.12)] border border-black/5 overflow-hidden">
+    <div className="p-2">
+      {/* Phim Đang Chiếu */}
+      <Link href="/cgv/movies?status=now_showing" className="flex items-center gap-4 px-4 py-4 hover:bg-red-50/80 rounded-2xl transition-all duration-300 group/item hover:translate-x-1">
+        <div className="w-10 h-10 rounded-xl bg-red-100/50 flex items-center justify-center text-red-600 group-hover/item:bg-red-600 group-hover/item:text-white transition-all duration-300 shadow-sm">
+          <PlayCircleOutlined className="text-xl" />
+        </div>
+        <div className="flex flex-col">
+          <span className="font-black text-gray-800 text-[13px] uppercase tracking-tight">Phim Đang Chiếu</span>
+          <span className="text-[10px] text-gray-400 font-bold tracking-widest uppercase">Now Showing</span>
+        </div>
+      </Link>
+
+      {/* Dấu gạch ngang phân cách nhẹ */}
+      <div className="mx-4 my-1 h-[1px] bg-gradient-to-r from-transparent via-gray-100 to-transparent"></div>
+
+      {/* Phim Sắp Chiếu */}
+      <Link href="/cgv/movies?status=coming_soon" className="flex items-center gap-4 px-4 py-4 hover:bg-red-50/80 rounded-2xl transition-all duration-300 group/item hover:translate-x-1">
+        <div className="w-10 h-10 rounded-xl bg-amber-100/50 flex items-center justify-center text-amber-600 group-hover/item:bg-amber-500 group-hover/item:text-white transition-all duration-300 shadow-sm">
+          <StarOutlined className="text-xl" />
+        </div>
+        <div className="flex flex-col">
+          <span className="font-black text-gray-800 text-[13px] uppercase tracking-tight">Phim Sắp Chiếu</span>
+          <span className="text-[10px] text-gray-400 font-bold tracking-widest uppercase">Coming Soon</span>
+        </div>
+      </Link>
+    </div>
+  </div>
+</div>
               </div>
 
+              {/* RẠP CGV Menu */}
+              <Link href="/cgv/cinemas" className="group relative cursor-pointer py-2">
+                <span className="group-hover:text-[#d90000] transition-colors duration-300 flex items-center gap-1">
+                  RẠP CGV
+                </span>
+                <span className="absolute bottom-0 left-0 w-0 h-[3px] bg-[#d90000] transition-all duration-300 group-hover:w-full rounded-full shadow-[0_2px_10px_rgba(217,0,0,0.3)]"></span>
+              </Link>
+
               {/* Other Menu Items */}
-              {['RẠP CGV', 'THÀNH VIÊN', 'CULTUREPLEX'].map((item, idx) => (
+              {['THÀNH VIÊN', 'CULTUREPLEX'].map((item, idx) => (
                 <div key={idx} className="group relative cursor-pointer py-2">
                   <span className="group-hover:text-[#d90000] transition-colors duration-300 flex items-center gap-1">
                     {item} <DownOutlined className="text-[10px] text-yellow-600 opacity-70 group-hover:opacity-100 transition-opacity" />

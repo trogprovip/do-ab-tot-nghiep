@@ -157,26 +157,20 @@ export default function MovieDetailPage() {
 
                 {/* Social & Buttons */}
                 <div className="flex gap-3 mb-6">
-                  <div className="bg-blue-600 text-white px-4 py-2 text-xs font-bold cursor-pointer hover:bg-blue-700 transition-colors">
-                    Like 12
-                  </div>
                   <Link href={`/cgv/movies/${movie.id}/showtimes`}>
-                    <button className="bg-red-600 text-white px-6 py-2 font-bold hover:bg-red-700 transition-colors flex items-center gap-2">
+                    <button className="bg-red-600 text-white px-6 py-2 font-bold hover:bg-red-700 transition-all duration-300 flex items-center gap-2 shadow-lg hover:shadow-red-600/50">
                       <ShoppingCartOutlined />
                       MUA VÉ
                     </button>
                   </Link>
-                </div>
-
-                {/* Trailer & Chi tiết */}
-                <div className="flex gap-4 mb-8">
+                  
                   {trailerEmbedUrl && (
                     <button
                       onClick={() => setShowTrailer(true)}
-                      className="bg-gray-700 text-white px-6 py-2 font-bold hover:bg-gray-800 transition-colors flex items-center gap-2"
+                      className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-2 font-bold hover:from-purple-700 hover:to-pink-700 transition-all duration-300 flex items-center gap-2 shadow-lg hover:shadow-purple-600/50"
                     >
                       <PlayCircleFilled />
-                      Trailer
+                      XEM TRAILER
                     </button>
                   )}
                 </div>

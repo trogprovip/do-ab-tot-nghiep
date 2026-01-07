@@ -6,7 +6,8 @@ import {
   PlayCircleFilled, 
   ShoppingCartOutlined, 
   StarFilled,
-  ClockCircleOutlined
+  ClockCircleOutlined,
+  FireFilled
 } from '@ant-design/icons';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
@@ -51,12 +52,20 @@ export default function AllMoviesPage() {
   };
 
   const handleTabChange = (key: string) => {
+    // Lưu vị trí scroll hiện tại
+    const scrollY = window.scrollY;
+    
     setCurrentPage(0);
     if (key === 'all') {
       router.push('/cgv/movies');
     } else {
       router.push(`/cgv/movies?status=${key}`);
     }
+    
+    // Khôi phục vị trí scroll sau khi navigation
+    setTimeout(() => {
+      window.scrollTo(0, scrollY);
+    },40);  
   };
 
   const getRatingBadge = (status: string | null) => 'T16';
@@ -68,15 +77,39 @@ export default function AllMoviesPage() {
       
       <div className="min-h-screen bg-[#fdfcf0]">
         {/* Page Header */}
-        <div className="bg-gradient-to-r from-red-600 to-red-700 text-white py-12">
-          <div className="container mx-auto px-4">
-            <h1 className="text-4xl md:text-5xl font-black uppercase tracking-tight flex items-center gap-3">
-              <StarFilled className="text-yellow-400" />
-              TẤT CẢ PHIM
-            </h1>
-            <p className="text-red-100 mt-2 text-lg">Khám phá kho phim đa dạng tại CGV</p>
-          </div>
-        </div>
+<div className="relative py-20 bg-[#fdfcf0] overflow-hidden border-b border-red-100">
+  {/* 1. Background Decor: Chữ CINEMA mờ làm nền */}
+  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 select-none pointer-events-none">
+    <span className="text-[120px] md:text-[180px] font-black text-gray-900/5 tracking-widest uppercase leading-none whitespace-nowrap">
+      CINEMA
+    </span>
+  </div>
+
+  {/* 2. Content Chính */}
+  <div className="container mx-auto px-4 text-center relative z-10">
+    {/* Label nhỏ bên trên */}
+    <div className="inline-flex items-center gap-2 mb-4 bg-white/80 backdrop-blur-sm border border-red-100 px-4 py-1 rounded-full shadow-sm">
+      <div className="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse"></div>
+      <span className="text-[10px] font-bold tracking-[0.3em] text-red-600 uppercase">CGV Catalog</span>
+      <div className="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse"></div>
+    </div>
+
+    {/* Tiêu đề chính cách điệu */}
+    <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tighter flex flex-col md:block items-center justify-center gap-2 md:gap-4 mb-4">
+      <span className="text-transparent bg-clip-text bg-gradient-to-br from-red-600 to-red-800 drop-shadow-sm">
+        MOVIES
+      </span>
+      {/* Chữ SELECTION dạng Outline (Viền) */}
+      <span className="text-[#2b2b2b] md:ml-4 relative">
+        SELECTION
+        {/* Dấu gạch chân nghệ thuật */}
+        <svg className="absolute -bottom-2 left-0 w-full h-3 text-yellow-400" viewBox="0 0 100 10" preserveAspectRatio="none">
+          <path d="M0 5 Q 50 10 100 5" stroke="currentColor" strokeWidth="3" fill="none" opacity="0.6" />
+        </svg>
+      </span>
+    </h1>
+  </div>
+</div>
 
         {/* Content */}
         <div className="container mx-auto px-4 py-12">
@@ -84,33 +117,21 @@ export default function AllMoviesPage() {
           <div className="mb-8 flex gap-3 flex-wrap">
             <button
               onClick={() => handleTabChange('all')}
-              className={`px-6 py-3 rounded-full font-bold transition-all duration-300 ${
-                status === 'all'
-                  ? 'bg-red-600 text-white shadow-lg scale-105'
-                  : 'bg-white text-gray-700 hover:bg-red-50 border-2 border-gray-200'
-              }`}
+              className={`px-6 py-3 rounded-full font-bold transition-all duration-300 ${status === 'all'? 'bg-red-600 text-white shadow-lg scale-105': 'bg-white text-gray-700 hover:bg-red-50 border-2 border-gray-200'}`}
             >
               <StarFilled className="mr-2" />
               Tất Cả Phim
             </button>
             <button
               onClick={() => handleTabChange('now_showing')}
-              className={`px-6 py-3 rounded-full font-bold transition-all duration-300 ${
-                status === 'now_showing'
-                  ? 'bg-red-600 text-white shadow-lg scale-105'
-                  : 'bg-white text-gray-700 hover:bg-red-50 border-2 border-gray-200'
-              }`}
+              className={`px-6 py-3 rounded-full font-bold transition-all duration-300 ${status === 'now_showing'? 'bg-red-600 text-white shadow-lg scale-105': 'bg-white text-gray-700 hover:bg-red-50 border-2 border-gray-200'}`}
             >
               <PlayCircleFilled className="mr-2" />
               Phim Đang Chiếu
             </button>
             <button
               onClick={() => handleTabChange('coming_soon')}
-              className={`px-6 py-3 rounded-full font-bold transition-all duration-300 ${
-                status === 'coming_soon'
-                  ? 'bg-red-600 text-white shadow-lg scale-105'
-                  : 'bg-white text-gray-700 hover:bg-red-50 border-2 border-gray-200'
-              }`}
+              className={`px-6 py-3 rounded-full font-bold transition-all duration-300 ${status === 'coming_soon'? 'bg-red-600 text-white shadow-lg scale-105': 'bg-white text-gray-700 hover:bg-red-50 border-2 border-gray-200'}`}
             >
               <ClockCircleOutlined className="mr-2" />
               Phim Sắp Chiếu
@@ -135,8 +156,9 @@ export default function AllMoviesPage() {
           {/* Movies Grid */}
           {!loading && !error && (
             <>
-              <div className="mb-6 text-gray-700 font-bold">
-                Tìm thấy <span className="text-red-600">{totalElements}</span> phim
+              <div className="mb-8 flex items-center gap-3 pl-4 border-l-4 border-red-600">
+                <span className="text-gray-400 text-xs font-bold uppercase tracking-widest">Số lượng phim</span>
+                <span className="text-3xl font-black text-gray-800 leading-none">{totalElements}</span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
@@ -231,21 +253,7 @@ export default function AllMoviesPage() {
 
       <CGVFooter />
 
-      <style jsx global>{`
-        .cgv-pagination .ant-pagination-item-active {
-          background: #d90000;
-          border-color: #d90000;
-        }
-        .cgv-pagination .ant-pagination-item-active a {
-          color: white;
-        }
-        .cgv-pagination .ant-pagination-item:hover {
-          border-color: #d90000;
-        }
-        .cgv-pagination .ant-pagination-item:hover a {
-          color: #d90000;
-        }
-      `}</style>
+      <style jsx global>{`.cgv-pagination .ant-pagination-item-active {background: #d90000;border-color: #d90000;}.cgv-pagination .ant-pagination-item-active a {color: white;}.cgv-pagination .ant-pagination-item:hover {border-color: #d90000;}.cgv-pagination .ant-pagination-item:hover a {color: #d90000;} `}</style>
     </>
   );
 }
