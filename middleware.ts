@@ -11,21 +11,22 @@ export function middleware(request: NextRequest) {
 
   // Kiểm tra tất cả các route admin khác
   if (pathname.startsWith('/admin')) {
-    const token = request.cookies.get('auth_token')?.value;
+    // Lấy token ADMIN (không phải token user)
+    const adminToken = request.cookies.get('admin_auth_token')?.value;
 
-    // Nếu không có token → chuyển về trang đăng nhập admin
-    if (!token) {
+    // Nếu không có token admin → chuyển về trang đăng nhập admin
+    if (!adminToken) {
       return NextResponse.redirect(new URL('/admin/login', request.url));
     }
 
     try {
       // Parse JWT token để lấy thông tin user
-      const base64Payload = token.split('.')[1];
+      const base64Payload = adminToken.split('.')[1];
       const payload = JSON.parse(Buffer.from(base64Payload, 'base64').toString());
       
       // Kiểm tra role - CHỈ cho phép admin
       if (payload.role !== 'admin') {
-        return NextResponse.redirect(new URL('/', request.url));
+        return NextResponse.redirect(new URL('/admin/login', request.url));
       }
     } catch (error) {
       console.error('Token parsing failed:', error);
@@ -33,9 +34,34 @@ export function middleware(request: NextRequest) {
     }
   }
 
+  // Kiểm tra các route user (nếu cần)
+  if (pathname.startsWith('/profile') || pathname.startsWith('/booking') || pathname.startsWith('/cgv/profile')) {
+    // Lấy token USER (không phải token admin)
+    const userToken = request.cookies.get('auth_token')?.value;
+
+    if (!userToken) {
+      return NextResponse.redirect(new URL('/auth/login', request.url));
+    }
+
+    try {
+      const base64Payload = userToken.split('.')[1];
+      const payload = JSON.parse(Buffer.from(base64Payload, 'base64').toString());
+      
+      // Có thể check thêm điều kiện cho user nếu cần
+    } catch (error) {
+      console.error('Token parsing failed:', error);
+      return NextResponse.redirect(new URL('/auth/login', request.url));
+    }
+  }
+
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/admin/:path*'], // Áp dụng cho tất cả route /admin/*
+  matcher: [
+    '/admin/:path*',      // Bảo vệ tất cả route admin
+    '/profile/:path*',    // Bảo vệ route user (nếu cần)
+    '/booking/:path*',    // Bảo vệ route booking (nếu cần)
+    '/cgv/profile',       // Bảo vệ trang profile CGV
+  ],
 };

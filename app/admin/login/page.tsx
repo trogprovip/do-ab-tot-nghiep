@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { authService } from '@/lib/services/authService';
+import { adminAuthService } from '@/lib/services/authService';
 import { 
   EyeOutlined, 
   EyeInvisibleOutlined, 
@@ -27,19 +27,18 @@ export default function AdminLoginPage() {
 
     setLoading(true);
     try {
-      const response = await authService.login({
+      const response = await adminAuthService.login({
         email: loginForm.email,
         password: loginForm.password,
       });
 
       if (response.success) {
         if (response.user?.role === 'admin') {
-          // Có thể dùng Toast/Notification thay vì alert để đẹp hơn
           alert('Đăng nhập Admin thành công!');
           window.location.href = '/admin';
         } else {
           alert('Tài khoản này không có quyền Admin!');
-          authService.logout();
+          adminAuthService.logout();
         }
       }
     } catch (error: unknown) {
@@ -51,7 +50,6 @@ export default function AdminLoginPage() {
   };
 
   return (
-    // Background Gradient Xanh nước biển dịu mắt
     <div className="min-h-screen bg-gradient-to-tr from-blue-100 via-white to-blue-50 flex items-center justify-center p-4 relative overflow-hidden">
       
       {/* Các hình tròn trang trí nền (Background Blobs) */}
@@ -146,17 +144,6 @@ export default function AdminLoginPage() {
               ) : 'Đăng nhập'}
             </button>
           </form>
-
-          {/* Divider & Back Link */}
-          <div className="mt-8 pt-6 border-t border-gray-100 text-center">
-            <Link 
-              href="/auth/login" 
-              className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-blue-600 font-medium transition-colors group"
-            >
-              <UserOutlined className="group-hover:-translate-x-1 transition-transform" /> 
-              Quay lại trang User
-            </Link>
-          </div>
         </div>
       </div>
     </div>

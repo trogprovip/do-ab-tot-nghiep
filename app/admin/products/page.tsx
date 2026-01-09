@@ -12,25 +12,44 @@ export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [pagination, setPagination] = useState({
+    currentPage: 0,
+    totalPages: 0,
+    totalElements: 0,
+    size: 5
+  });
 
   useEffect(() => {
     fetchProducts();
-  }, [searchTerm]);
+  }, [searchTerm, pagination.currentPage]);
 
   const fetchProducts = async () => {
     try {
       setLoading(true);
       const response = await productService.getProducts({
-        page: 0,
-        size: 100,
+        page: pagination.currentPage,
+        size: pagination.size,
         search: searchTerm || undefined,
       });
       setProducts(response.content);
+      setPagination(prev => ({
+        ...prev,
+        totalPages: response.totalPages || 0,
+        totalElements: response.totalElements || 0
+      }));
     } catch (error) {
       console.error('Error fetching products:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handlePageChange = (page: number) => {
+    setPagination(prev => ({ ...prev, currentPage: page }));
+  };
+
+  const handleView = (row: Product) => {
+    router.push(`/admin/products/${row.id}`);
   };
 
   const handleEdit = (row: Product) => {
@@ -133,6 +152,14 @@ export default function ProductsPage() {
           data={products}
           onEdit={handleEdit}
           onDelete={handleDelete}
+          onView={handleView}
+          pagination={{
+            currentPage: pagination.currentPage,
+            totalPages: pagination.totalPages,
+            totalElements: pagination.totalElements,
+            size: pagination.size,
+            onPageChange: handlePageChange
+          }}
         />
       )}
     </div>

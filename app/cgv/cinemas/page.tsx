@@ -2,10 +2,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { Spin, Empty } from 'antd';
-import { EnvironmentOutlined,  PhoneOutlined, ArrowLeftOutlined } from '@ant-design/icons';
+import { EnvironmentOutlined,  PhoneOutlined } from '@ant-design/icons';
 import Link from 'next/link';
 import CGVHeader from '@/components/cgv/CGVHeader';
 import CGVFooter from '@/components/cgv/CGVFooter';
+import BackButton from '@/components/ui/BackButton';
 
 interface Cinema {
   id: number;
@@ -77,19 +78,6 @@ export default function CinemasPage() {
       <CGVHeader />
       
       <div className="min-h-screen bg-[#fdfcf0]">
-        {/* Page Header */}
-        <div className="bg-[#fdfcf0] py-12 border-b-2 border-red-500/10">
-          <div className="container mx-auto px-4 flex flex-col items-center text-center">
-            <EnvironmentOutlined className="text-3xl text-red-600 mb-3" />
-            <h1 className="text-3xl md:text-4xl font-black uppercase tracking-tight text-gray-800">
-              RẠP <span className="text-red-600">CGV</span>
-            </h1>
-            <div className="w-12 h-0.5 bg-gray-300 my-4"></div>
-            <p className="text-gray-600 text-base md:text-lg font-medium max-w-lg italic">
-              Hệ thống rạp chiếu phim hiện đại trên toàn quốc
-            </p>
-          </div>
-        </div>
 
         {/* Content */}
         <div className="container mx-auto px-4 py-12">
@@ -153,16 +141,12 @@ export default function CinemasPage() {
           ) : (
             /* Cinemas in Selected Province */
 <div className="max-w-7xl mx-auto px-4">
-  {/* Back Button - Làm lại cho sang hơn */}
-  <button
+  {/* Back Button */}
+  <BackButton 
     onClick={handleBackToProvinces}
-    className="mb-8 flex items-center gap-2 group text-gray-500 hover:text-red-600 transition-colors"
-  >
-    <div className="p-2 rounded-full bg-white shadow-sm group-hover:bg-red-50 transition-colors">
-      <ArrowLeftOutlined /> {/* Hoặc <ChevronLeft size={20} /> */}
-    </div>
-    <span className="font-semibold text-sm uppercase tracking-wider">Quay lại chọn tỉnh thành</span>
-  </button>
+    text="Quay lại chọn tỉnh thành"
+    className="mb-8"
+  />
 
   {/* Header Section */}
   <div className="text-center mb-12">

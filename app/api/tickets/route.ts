@@ -61,6 +61,30 @@ export async function GET(request: NextRequest) {
             },
           },
         },
+        bookingseats: {
+          include: {
+            seats: {
+              select: {
+                seat_number: true,
+                seattypes: {
+                  select: {
+                    type_name: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        ticketsdetails: {
+          include: {
+            products: {
+              select: {
+                product_name: true,
+                category: true,
+              },
+            },
+          },
+        },
       },
     });
 

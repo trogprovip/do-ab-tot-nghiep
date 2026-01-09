@@ -12,25 +12,40 @@ export default function RoomsPage() {
   const [rooms, setRooms] = useState<Room[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [pagination, setPagination] = useState({
+    currentPage: 0,
+    totalPages: 0,
+    totalElements: 0,
+    size: 5
+  });
 
   useEffect(() => {
     fetchRooms();
-  }, [searchTerm]);
+  }, [searchTerm, pagination.currentPage]);
 
   const fetchRooms = async () => {
     try {
       setLoading(true);
       const response = await roomService.getRooms({
-        page: 0,
-        size: 100,
+        page: pagination.currentPage,
+        size: pagination.size,
         search: searchTerm || undefined,
       });
       setRooms(response.content);
+      setPagination(prev => ({
+        ...prev,
+        totalPages: response.totalPages || 0,
+        totalElements: response.totalElements || 0
+      }));
     } catch (error) {
       console.error('Error fetching rooms:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handlePageChange = (page: number) => {
+    setPagination(prev => ({ ...prev, currentPage: page }));
   };
 
   const handleEdit = (row: Room) => {
@@ -128,6 +143,13 @@ export default function RoomsPage() {
           data={rooms}
           onEdit={handleEdit}
           onDelete={handleDelete}
+          pagination={{
+            currentPage: pagination.currentPage,
+            totalPages: pagination.totalPages,
+            totalElements: pagination.totalElements,
+            size: pagination.size,
+            onPageChange: handlePageChange
+          }}
         />
       )}
     </div>

@@ -6,6 +6,7 @@ import { CalendarOutlined, EnvironmentOutlined, ClockCircleOutlined, LeftOutline
 import { Spin } from 'antd';
 import CGVHeader from '@/components/cgv/CGVHeader';
 import CGVFooter from '@/components/cgv/CGVFooter';
+import BackButton from '@/components/ui/BackButton';
 import Link from 'next/link';
 import { provinceService } from '@/lib/services/provinceService';
 import { slotService } from '@/lib/services/slotService';
@@ -239,6 +240,14 @@ export default function MovieShowtimesPage({ params }: { params: Promise<{ id: s
           </div>
         )}
         
+        {/* Back Button */}
+        <div className="container mx-auto px-4 pt-6">
+          <BackButton 
+            onClick={() => window.history.back()}
+            text="Quay lại"
+          />
+        </div>
+
         {/* Calendar Section */}
         <div className="bg-[#fdfcf0] border-b-2 border-gray-200 shadow-sm">
           <div className="container mx-auto px-4 py-4">

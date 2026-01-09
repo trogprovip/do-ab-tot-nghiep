@@ -42,7 +42,7 @@ export default function MovieSelection() {
   const formatDate = (date: Date | null) => date ? new Date(date).toLocaleDateString('vi-VN') : 'Đang cập nhật';
 
   return (
-    <section className="py-16 bg-[#fdfcf0] relative overflow-hidden font-sans">
+    <section className="py-16 bg-[#fdfcf0] relative overflow-hidden overflow-x-hidden font-sans">
       
       {/* Background Decor - Vệt sáng nền ấm áp, rực rỡ */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-5xl h-full bg-gradient-to-tr from-red-200/40 via-yellow-200/40 to-transparent blur-[100px] pointer-events-none"></div>
@@ -80,11 +80,11 @@ export default function MovieSelection() {
 
         {/* Movies Grid */}
         {!loading && !error && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-12">
             {movies.map((movie) => (
               <div 
                 key={movie.id}
-                className="group relative bg-white rounded-2xl overflow-hidden border-2 border-gray-100 hover:border-red-500 transition-all duration-300 shadow-md hover:shadow-xl hover:shadow-red-200/50 hover:-translate-y-2"
+                className="group relative bg-white rounded-xl sm:rounded-2xl overflow-hidden border border-gray-100 sm:border-2 hover:border-red-500 transition-all duration-300 shadow-sm sm:shadow-md hover:shadow-lg sm:hover:shadow-xl hover:shadow-red-200/50 hover:-translate-y-1 sm:hover:-translate-y-2"
               >
                 {/* Poster Area */}
                 <div className="relative aspect-[2/3] overflow-hidden cursor-pointer">
@@ -127,21 +127,21 @@ export default function MovieSelection() {
                 </div>
 
                 {/* Content Area - Nền trắng, chữ đen */}
-                <div className="p-5 relative">
-                  <h3 className="font-black text-lg text-gray-900 mb-1 line-clamp-1 group-hover:text-red-600 transition-colors" title={movie.title}>
+                <div className="p-3 sm:p-4 lg:p-5 relative">
+                  <h3 className="font-black text-xs sm:text-sm lg:text-lg text-gray-900 mb-1 line-clamp-1 group-hover:text-red-600 transition-colors" title={movie.title}>
                     {movie.title}
                   </h3>
-                  <p className="text-sm text-gray-500 mb-5 line-clamp-1 font-medium">Thể loại: Hành động, Viễn tưởng...</p>
+                  <p className="text-[10px] sm:text-sm text-gray-500 mb-2 sm:mb-5 line-clamp-1 font-medium">Thể loại: Hành động, Viễn tưởng...</p>
                   
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 gap-2 sm:gap-3">
                     <Link href={`/cgv/movies/${movie.id}`}>
-                      <button className="w-full py-2.5 rounded-xl text-sm font-bold border-2 border-red-600 text-red-600 hover:bg-red-600 hover:text-white transition-all duration-300">
+                      <button className="w-full py-1.5 sm:py-2.5 rounded-lg sm:rounded-xl text-[10px] sm:text-sm font-bold border border-red-600 text-red-600 hover:bg-red-600 hover:text-white transition-all duration-300">
                         CHI TIẾT
                       </button>
                     </Link>
                     <Link href={`/cgv/movies/${movie.id}/showtimes`}>
-                      <button className="w-full py-2.5 rounded-xl text-sm font-bold bg-gradient-to-r from-red-600 to-red-500 text-white shadow-md hover:shadow-lg hover:shadow-red-500/30 hover:to-red-400 transition-all duration-300 flex items-center justify-center gap-1 group/btn">
-                        <ShoppingCartOutlined className="group-hover/btn:animate-bounce"/> MUA VÉ
+                      <button className="w-full py-1.5 sm:py-2.5 rounded-lg sm:rounded-xl text-[10px] sm:text-sm font-bold bg-gradient-to-r from-red-600 to-red-500 text-white shadow-sm hover:shadow-md hover:shadow-red-500/30 hover:to-red-400 transition-all duration-300 flex items-center justify-center gap-1 group/btn">
+                        <ShoppingCartOutlined className="group-hover/btn:animate-bounce text-[10px] sm:text-sm"/> MUA VÉ
                       </button>
                     </Link>
                   </div>

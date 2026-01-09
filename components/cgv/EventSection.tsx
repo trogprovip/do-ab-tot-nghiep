@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
-import React, { useState } from 'react';
-import { Carousel } from 'antd';
+import React, { useState, useEffect } from 'react';
+import { Carousel, Spin } from 'antd';
 import { 
   LeftOutlined, 
   RightOutlined, 
@@ -10,18 +10,64 @@ import {
   GiftFilled,
   StarFilled,
   FireFilled,
-  TeamOutlined 
+  TeamOutlined,
+  CalendarOutlined,
+  NotificationOutlined
 } from '@ant-design/icons';
 import Link from 'next/link';
 
-// Mock data
-const events = [
-  { id: 1, title: 'Quà Tặng Đầy Tay', image: 'https://iguov8nhvyobj.vcdn.cloud/media/banner/cache/1/b58515f018eb873dafa430b6f9ae0c1e/2/4/240x201_14_.png', icon: <GiftFilled />, color: 'from-pink-500 to-rose-500' },
-  { id: 2, title: 'Đồng Giá 79.000Đ', image: 'https://iguov8nhvyobj.vcdn.cloud/media/banner/cache/1/b58515f018eb873dafa430b6f9ae0c1e/2/4/240x201_14_.png', icon: <TagFilled />, color: 'from-orange-400 to-red-500' },
-  { id: 3, title: 'Combo Bắp Nước', image: 'https://iguov8nhvyobj.vcdn.cloud/media/banner/cache/1/b58515f018eb873dafa430b6f9ae0c1e/2/4/240x201_14_.png', icon: <FireFilled />, color: 'from-yellow-400 to-orange-500' },
-  { id: 4, title: 'CGV Member Day', image: 'https://iguov8nhvyobj.vcdn.cloud/media/banner/cache/1/b58515f018eb873dafa430b6f9ae0c1e/2/4/240x201_14_.png', icon: <StarFilled />, color: 'from-purple-500 to-indigo-500' },
-  { id: 5, title: 'U22 Vui Vẻ', image: 'https://iguov8nhvyobj.vcdn.cloud/media/banner/cache/1/b58515f018eb873dafa430b6f9ae0c1e/2/4/240x201_14_.png', icon: <TeamOutlined />, color: 'from-blue-400 to-cyan-500' },
-];
+interface News {
+  id: number;
+  title: string;
+  content: string;
+  image_url: string;
+  type: string;
+  status: string;
+  start_date: string;
+  end_date: string;
+  created_at: string;
+  updated_at: string;
+}
+
+// Icon mapping for different news types
+const getIconForType = (type: string) => {
+  switch (type?.toUpperCase()) {
+    case 'EVENT':
+      return <CalendarOutlined />;
+    case 'PROMOTION':
+      return <TagFilled />;
+    case 'MEMBER':
+      return <StarFilled />;
+    case 'COMBO':
+      return <FireFilled />;
+    case 'GROUP':
+      return <TeamOutlined />;
+    case 'GIFT':
+      return <GiftFilled />;
+    default:
+      return <NotificationOutlined />;
+  }
+};
+
+// Color mapping for different news types
+const getColorForType = (type: string) => {
+  switch (type?.toUpperCase()) {
+    case 'EVENT':
+      return 'from-purple-500 to-indigo-500';
+    case 'PROMOTION':
+      return 'from-orange-400 to-red-500';
+    case 'MEMBER':
+      return 'from-blue-400 to-cyan-500';
+    case 'COMBO':
+      return 'from-yellow-400 to-orange-500';
+    case 'GROUP':
+      return 'from-teal-500 to-emerald-700';
+    case 'GIFT':
+      return 'from-pink-500 to-rose-500';
+    default:
+      return 'from-gray-500 to-gray-700';
+  }
+};
 
 const specialOffers = [
   {
@@ -53,9 +99,29 @@ const specialOffers = [
 export default function EventSection() {
   const carouselRef = React.useRef<any>(null);
   const [activeTab, setActiveTab] = useState('member');
+  const [events, setEvents] = useState<News[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  // Fetch news data
+  const fetchEvents = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/news?size=10&status=ACTIVE');
+      const data = await response.json();
+      setEvents(data.content || []);
+    } catch (error) {
+      console.error('Error fetching events:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchEvents();
+  }, []);
 
   return (
-    <section className="py-16 bg-white relative">
+    <section className="py-16 bg-[#fdfcf0] relative overflow-hidden">
         {/* Background Decorative Circles */}
         <div className="absolute top-0 left-0 w-64 h-64 bg-red-100 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 opacity-60 pointer-events-none"></div>
         <div className="absolute bottom-0 right-0 w-96 h-96 bg-yellow-100 rounded-full blur-3xl translate-x-1/3 translate-y-1/3 opacity-60 pointer-events-none"></div>
@@ -89,120 +155,80 @@ export default function EventSection() {
         </div>
 
         {/* Events Carousel */}
-        <div className="relative mb-16 px-4 md:px-8">
-          <button
-            onClick={() => carouselRef.current?.prev()}
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-20 w-12 h-12 bg-white text-red-600 rounded-full shadow-lg border border-red-100 flex items-center justify-center hover:bg-red-600 hover:text-white transition-all hover:scale-110 -ml-2 md:-ml-6"
-          >
-            <LeftOutlined className="text-lg" />
-          </button>
+      <div className="relative mb-12 px-4 md:px-10 group/carousel overflow-x-hidden">
+        {/* Nút điều hướng - Thu nhỏ lại và ẩn/hiện thông minh */}
+      <button
+    onClick={() => carouselRef.current?.prev()}
+    className="absolute left-0 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-white/90 text-red-600 rounded-full shadow-md flex items-center justify-center opacity-0 group-hover/carousel:opacity-100 transition-all -ml-2 hover:bg-red-600 hover:text-white"
+  >
+    <LeftOutlined />
+  </button>
 
-          <button
-            onClick={() => carouselRef.current?.next()}
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-20 w-12 h-12 bg-white text-red-600 rounded-full shadow-lg border border-red-100 flex items-center justify-center hover:bg-red-600 hover:text-white transition-all hover:scale-110 -mr-2 md:-mr-6"
-          >
-            <RightOutlined className="text-lg" />
-          </button>
+  <button
+    onClick={() => carouselRef.current?.next()}
+    className="absolute right-0 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-white/90 text-red-600 rounded-full shadow-md flex items-center justify-center opacity-0 group-hover/carousel:opacity-100 transition-all -mr-2 hover:bg-red-600 hover:text-white"
+  >
+    <RightOutlined />
+  </button>
 
-          <Carousel
-            ref={carouselRef}
-            slidesToShow={4}
-            slidesToScroll={1}
-            dots={false}
-            autoplay
-            responsive={[
-              { breakpoint: 1024, settings: { slidesToShow: 3 } },
-              { breakpoint: 768, settings: { slidesToShow: 2 } },
-              { breakpoint: 480, settings: { slidesToShow: 1 } },
-            ]}
-          >
-            {events.map((event) => (
-              <div key={event.id} className="px-3 pb-4 pt-2">
-                <Link href={`/cgv/events/${event.id}`}>
-                    <div className="group relative bg-white rounded-2xl overflow-hidden shadow-[0_5px_15px_rgba(0,0,0,0.05)] hover:shadow-[0_20px_40px_rgba(220,38,38,0.15)] transition-all duration-300 hover:-translate-y-2 border border-gray-100 h-full">
-                    
-                    {/* Image Area - Đã bỏ opacity thấp */}
-                    <div className={`relative h-56 w-full flex items-center justify-center overflow-hidden`}>
-                        
-                        {/* HÌNH ẢNH: Hiển thị rõ nét 100% */}
-                        <img 
-                            src={event.image} 
-                            alt={event.title} 
-                            className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                        />
+  <Carousel
+    ref={carouselRef}
+    slidesToShow={4}
+    slidesToScroll={1}
+    dots={false}
+    autoplay={true}         // Tự động chạy
+    autoplaySpeed={3000}    // 3 giây chuyển 1 lần
+    infinite={true}         // Chạy vòng lặp vô tận
+    className="pb-6"
+    responsive={[
+      { breakpoint: 1024, settings: { slidesToShow: 3 } },
+      { breakpoint: 768, settings: { slidesToShow: 2 } },
+      { breakpoint: 480, settings: { slidesToShow: 1 } },
+    ]}
+  >
+    {events.map((news) => (
+      <div key={news.id} className="px-2"> 
+        <Link href={`/news/${news.id}`}>
+          {/* Group để hover cái nào hiện cái đó */}
+          <div className="group relative bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300">
+            
+            {/* Vùng ảnh: Dùng tỉ lệ 3:4 để khớp với poster đứng của CGV */}
+            <div className="relative aspect-[3/4] w-full overflow-hidden bg-gray-200">
+              <img 
+                src={news.image_url} 
+                alt={news.title} 
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              />
 
-                        {/* Lớp phủ màu gradient nhẹ (để icon trắng nổi bật) */}
-                        <div className={`absolute inset-0 bg-gradient-to-t ${event.color} opacity-80 mix-blend-multiply transition-opacity duration-300 group-hover:opacity-70`}></div>
-                        
-                        {/* Họa tiết trang trí mờ */}
-                        <div className="absolute inset-0 opacity-30" style={{ backgroundImage: 'radial-gradient(circle, #fff 2px, transparent 2.5px)', backgroundSize: '20px 20px' }}></div>
-                        
-                        {/* Icon chính giữa */}
-                        <div className="text-center z-10 transform transition-transform duration-500 group-hover:scale-110">
-                            <div className="text-5xl text-white mb-2 drop-shadow-lg filter">{event.icon}</div>
-                        </div>
-
-                        {/* Overlay "Xem Chi Tiết" */}
-                        <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center z-20">
-                            <span className="bg-white text-red-600 px-6 py-2 rounded-full font-bold text-sm shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-                                XEM CHI TIẾT
-                            </span>
-                        </div>
-                    </div>
-
-                    <div className="p-4 text-center">
-                        <h3 className="font-bold text-gray-800 text-lg group-hover:text-red-600 transition-colors line-clamp-1">
-                        {event.title}
-                        </h3>
-                    </div>
-                    </div>
-                </Link>
+              {/* Lớp phủ Hover riêng biệt cho từng thẻ */}
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center z-10">
+                <span className="bg-red-600 text-white px-4 py-1.5 rounded-full font-bold text-[10px] tracking-wider transform translate-y-4 group-hover:translate-y-0 transition-transform">
+                  XEM CHI TIẾT
+                </span>
               </div>
-            ))}
-          </Carousel>
-        </div>
 
-        {/* Special Offers Grid - Đã làm ảnh sáng và rõ hơn */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {specialOffers.map((offer) => (
-            <Link href={`/cgv/offers/${offer.id}`} key={offer.id}>
-                <div className="relative h-48 rounded-2xl overflow-hidden shadow-lg transition-all duration-300 hover:shadow-2xl hover:scale-[1.02] cursor-pointer group">
-                    
-                    {/* HÌNH NỀN: Rõ nét, không bị mờ đục */}
-                    <img 
-                        src={offer.backgroundImage} 
-                        alt={offer.title}
-                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                    />
-                    
-                    {/* Lớp phủ màu Gradient (Multiply) để ảnh được 'nhuộm' màu nhưng vẫn rõ chi tiết */}
-                    <div className={`absolute inset-0 bg-gradient-to-br ${offer.gradient} opacity-85 mix-blend-multiply transition-opacity duration-300 group-hover:opacity-90 z-0`}></div>
+              {/* Icon nhỏ xinh ở góc */}
+              <div className="absolute top-2 right-2 z-20 bg-black/20 backdrop-blur-sm p-1.5 rounded-lg text-white text-xs">
+                {getIconForType(news.type)}
+              </div>
+            </div>
 
-                    {/* Lớp phủ bóng đen nhẹ ở dưới để text trắng dễ đọc hơn */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent z-0"></div>
-                    
-                    <div className="absolute top-0 right-0 -mt-8 -mr-8 w-32 h-32 bg-white/20 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500 z-0"></div>
-                    
-                    <div className="absolute inset-0 flex flex-col justify-center px-8 z-10">
-                        <div className="flex justify-between items-start mb-2">
-                            <h3 className="text-2xl font-black text-white leading-tight max-w-[80%] uppercase drop-shadow-md">
-                                {offer.title}
-                            </h3>
-                            <div className="text-white/90 group-hover:rotate-12 transition-transform duration-300 drop-shadow-md">
-                                {offer.icon}
-                            </div>
-                        </div>
-                        
-                        <p className="text-white/95 font-medium text-lg mb-4 drop-shadow-sm">{offer.sub}</p>
-                        
-                        <div className="w-fit bg-white/20 backdrop-blur-md border border-white/50 text-white text-sm font-bold px-4 py-2 rounded-lg group-hover:bg-white group-hover:text-gray-800 transition-all shadow-sm">
-                            KHÁM PHÁ NGAY
-                        </div>
-                    </div>
-                </div>
-            </Link>
-          ))}
-        </div>
+            {/* Nội dung chữ: Cực kỳ gọn gàng */}
+            <div className="p-3">
+              <h3 className="font-bold text-gray-800 text-[13px] line-clamp-2 h-9 leading-tight uppercase group-hover:text-red-600 transition-colors">
+                {news.title}
+              </h3>
+              <div className="mt-2 flex items-center justify-between border-t pt-2 border-gray-50">
+                <span className="text-[9px] text-gray-400 font-bold tracking-widest">TIN MỚI NHẤT</span>
+                <span className="w-2 h-2 rounded-full bg-red-500"></span>
+              </div>
+            </div>
+          </div>
+        </Link>
+      </div>
+    ))}
+  </Carousel>
+</div>
       </div>
     </section>
   );

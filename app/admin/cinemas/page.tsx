@@ -10,10 +10,16 @@ export default function CinemasPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+  const [pagination, setPagination] = useState({
+    currentPage: 0,
+    totalPages: 0,
+    totalElements: 0,
+    size: 5
+  });
 
   useEffect(() => {
     fetchCinemas();
-  }, [searchTerm, statusFilter]);
+  }, [searchTerm, statusFilter, pagination.currentPage]);
 
   const fetchCinemas = async () => {
     try {
@@ -22,17 +28,26 @@ export default function CinemasPage() {
       const params: CinemaFilterForm = {
         search: searchTerm || undefined,
         status: statusFilter || undefined,
-        page: 0,
-        size: 100
+        page: pagination.currentPage,
+        size: pagination.size
       };
       
       const data = await cinemaService.getCinemas(params);
       setCinemas(data.content || []);
+      setPagination(prev => ({
+        ...prev,
+        totalPages: data.totalPages || 0,
+        totalElements: data.totalElements || 0
+      }));
     } catch (error) {
       console.error('Error fetching cinemas:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handlePageChange = (page: number) => {
+    setPagination(prev => ({ ...prev, currentPage: page }));
   };
 
   const handleDelete = async (cinema: Cinema) => {
@@ -126,6 +141,13 @@ export default function CinemasPage() {
           onDelete={handleDelete}
           onEdit={handleEdit}
           onView={(cinema) => handleEdit(cinema)}
+          pagination={{
+            currentPage: pagination.currentPage,
+            totalPages: pagination.totalPages,
+            totalElements: pagination.totalElements,
+            size: pagination.size,
+            onPageChange: handlePageChange
+          }}
         />
       )}
     </div>

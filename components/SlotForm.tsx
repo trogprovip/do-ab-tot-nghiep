@@ -4,6 +4,9 @@
 import React, { useState, useEffect } from 'react';
 import { movieService } from '@/lib/services/movieService';
 import { roomService } from '@/lib/services/roomService';
+import { DatePicker, TimePicker } from 'antd';
+import dayjs, { Dayjs } from 'dayjs';
+import 'antd/dist/reset.css';
 
 interface Movie {
   id: number;
@@ -27,55 +30,49 @@ interface SlotFormProps {
 
 export default function SlotForm({ initialData, onSubmit, isEditing = false }: SlotFormProps) {
   
-  // 1. CHUYỂN Backend format -> yyyy-MM-ddTHH:mm (Hiện lên Input)
-  const formatDateTimeForInput = (dateString: string | undefined) => {
-    if (!dateString) return '';
+  // Helper function to convert backend datetime string to dayjs object
+  const formatDateTimeToDayjs = (dateString: string | undefined) => {
+    if (!dateString) return null;
     try {
       let date: Date;
       
       if (typeof dateString === 'string') {
-        // Xử lý format "dd-MM-yyyy HH:mm:ss" từ backend
         if (dateString.includes('-') && !dateString.includes('T')) {
           const parts = dateString.split(' ');
           const dateParts = parts[0].split('-');
+          const timeParts = parts[1]?.split(':') || ['00', '00', '00'];
           
-          // Kiểm tra xem là dd-MM-yyyy hay yyyy-MM-dd
           if (dateParts[0].length === 4) {
-            // yyyy-MM-dd HH:mm:ss
             const [year, month, day] = dateParts;
-            const [hours, minutes] = parts[1].split(':');
+            const [hours, minutes] = timeParts;
             date = new Date(Number(year), Number(month) - 1, Number(day), Number(hours), Number(minutes));
           } else {
-            // dd-MM-yyyy HH:mm:ss
             const [day, month, year] = dateParts;
-            const [hours, minutes] = parts[1].split(':');
+            const [hours, minutes] = timeParts;
             date = new Date(Number(year), Number(month) - 1, Number(day), Number(hours), Number(minutes));
           }
         } else {
-          // ISO format
           date = new Date(dateString);
         }
       } else {
         date = new Date(dateString);
       }
       
-      if (isNaN(date.getTime())) return '';
-      
-      // Chuyển sang format yyyy-MM-ddTHH:mm cho input
-      const offset = date.getTimezoneOffset() * 60000;
-      const localDate = new Date(date.getTime() - offset);
-      return localDate.toISOString().slice(0, 16);
+      if (isNaN(date.getTime())) return null;
+      return dayjs(date);
     } catch (e) {
       console.error('Error formatting date:', e);
-      return '';
+      return null;
     }
   };
 
   const [formData, setFormData] = useState<any>({
     movie_id: initialData?.movie_id || 0,
     room_id: initialData?.room_id || 0,
-    show_time: formatDateTimeForInput(initialData?.show_time),
-    end_time: formatDateTimeForInput(initialData?.end_time),
+    show_date: formatDateTimeToDayjs(initialData?.show_time),
+    show_time: formatDateTimeToDayjs(initialData?.show_time),
+    end_date: formatDateTimeToDayjs(initialData?.end_time),
+    end_time: formatDateTimeToDayjs(initialData?.end_time),
     price: initialData?.price || 0,
     empty_seats: initialData?.empty_seats || 0,
   });
@@ -107,8 +104,10 @@ export default function SlotForm({ initialData, onSubmit, isEditing = false }: S
       setFormData({
         movie_id: initialData.movies?.id || initialData.movie_id || 0,
         room_id: initialData.rooms?.id || initialData.room_id || 0,
-        show_time: formatDateTimeForInput(initialData.show_time),
-        end_time: formatDateTimeForInput(initialData.end_time),
+        show_date: formatDateTimeToDayjs(initialData.show_time),
+        show_time: formatDateTimeToDayjs(initialData.show_time),
+        end_date: formatDateTimeToDayjs(initialData.end_time),
+        end_time: formatDateTimeToDayjs(initialData.end_time),
         price: initialData.price || 0,
         empty_seats: initialData.empty_seats || 0,
       });
@@ -120,28 +119,46 @@ export default function SlotForm({ initialData, onSubmit, isEditing = false }: S
     setFormData((prev: any) => ({ ...prev, [name]: value }));
   };
 
-  // 2. CHUYỂN yyyy-MM-ddTHH:mm -> yyyy-MM-dd HH:mm:ss (Gửi về Spring Boot)
+  const handleDateChange = (field: string, date: Dayjs | null) => {
+    setFormData((prev: any) => ({ ...prev, [field]: date }));
+  };
+
+  // 2. CHUYỂN dayjs objects -> yyyy-MM-dd HH:mm:ss (Gửi về Spring Boot)
 const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
   setLoading(true);
   setError(null);
 
   try {
-    // ✅ FIX: Không dùng Date object, chỉ xử lý string thuần
-    const formatForBackend = (inputStr: string) => {
-      if (!inputStr) return null;
-      // inputStr: "2026-01-11T19:00"
-      const [datePart, timePart] = inputStr.split('T');
-      
-      // ✅ GIỮ NGUYÊN string, không tạo Date object
-      return `${datePart} ${timePart}:00`;
-    };
+    // Validate that both date and time are selected for show time
+    if (!formData.show_date || !formData.show_time) {
+      setError('Vui lòng chọn đầy đủ ngày và giờ chiếu');
+      return;
+    }
+    
+    // Validate that both date and time are selected for end time
+    if (!formData.end_date || !formData.end_time) {
+      setError('Vui lòng chọn đầy đủ ngày và giờ kết thúc');
+      return;
+    }
+
+    // Combine date and time for show time
+    const showDateTime = formData.show_date
+      .hour(formData.show_time.hour())
+      .minute(formData.show_time.minute())
+      .second(0);
+
+    // Combine date and time for end time
+    const endDateTime = formData.end_date
+      .hour(formData.end_time.hour())
+      .minute(formData.end_time.minute())
+      .second(0);
 
     const submitData = {
       movieId: Number(formData.movie_id),
       roomId: Number(formData.room_id),
-      showTime: formatForBackend(formData.show_time),
-      endTime: formatForBackend(formData.end_time),
+      showTime: showDateTime.format('YYYY-MM-DD HH:mm:ss'),
+      endTime: endDateTime.format('YYYY-MM-DD HH:mm:ss'),
     };
 
     console.log('📤 Sending to backend:', submitData);
@@ -161,7 +178,7 @@ const handleSubmit = async (e: React.FormEvent) => {
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <div>
           <label className="block text-sm font-medium mb-2">Phim *</label>
           <select 
@@ -199,28 +216,70 @@ const handleSubmit = async (e: React.FormEvent) => {
         </div>
 
         <div>
+          <label className="block text-sm font-medium mb-2">Ngày chiếu *</label>
+          <DatePicker
+            value={formData.show_date}
+            onChange={(date) => handleDateChange('show_date', date)}
+            placeholder="Chọn ngày chiếu"
+            format="DD/MM/YYYY"
+            className="w-full"
+            style={{ 
+              padding: '8px 16px',
+              borderRadius: '8px',
+              border: '1px solid #d1d5db',
+              height: '40px'
+            }}
+          />
+        </div>
+
+        <div>
           <label className="block text-sm font-medium mb-2">Giờ chiếu *</label>
-          <input 
-            type="datetime-local" 
-            name="show_time" 
-            value={formData.show_time || ''} 
-            onChange={handleChange} 
-            required 
-            step="60"
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+          <TimePicker
+            value={formData.show_time}
+            onChange={(time) => handleDateChange('show_time', time)}
+            placeholder="Chọn giờ chiếu"
+            format="HH:mm"
+            className="w-full"
+            style={{ 
+              padding: '8px 16px',
+              borderRadius: '8px',
+              border: '1px solid #d1d5db',
+              height: '40px'
+            }}
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-2">Ngày kết thúc *</label>
+          <DatePicker
+            value={formData.end_date}
+            onChange={(date) => handleDateChange('end_date', date)}
+            placeholder="Chọn ngày kết thúc"
+            format="DD/MM/YYYY"
+            className="w-full"
+            style={{ 
+              padding: '8px 16px',
+              borderRadius: '8px',
+              border: '1px solid #d1d5db',
+              height: '40px'
+            }}
           />
         </div>
 
         <div>
           <label className="block text-sm font-medium mb-2">Giờ kết thúc *</label>
-          <input 
-            type="datetime-local" 
-            name="end_time" 
-            value={formData.end_time || ''} 
-            onChange={handleChange} 
-            required 
-            step="60"
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+          <TimePicker
+            value={formData.end_time}
+            onChange={(time) => handleDateChange('end_time', time)}
+            placeholder="Chọn giờ kết thúc"
+            format="HH:mm"
+            className="w-full"
+            style={{ 
+              padding: '8px 16px',
+              borderRadius: '8px',
+              border: '1px solid #d1d5db',
+              height: '40px'
+            }}
           />
         </div>
       </div>

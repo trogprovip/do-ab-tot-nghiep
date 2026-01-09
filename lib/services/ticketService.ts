@@ -32,6 +32,26 @@ export interface Ticket {
       room_name: string;
     };
   };
+  bookingseats?: Array<{
+    id: number;
+    seat_price: number;
+    seats: {
+      seat_number: string;
+      seattypes: {
+        type_name: string;
+      };
+    };
+  }>;
+  ticketsdetails?: Array<{
+    id: number;
+    quantity: number;
+    unit_price: number;
+    total_price: number;
+    products: {
+      product_name: string;
+      category: 'food' | 'drink' | 'combo' | 'voucher';
+    };
+  }>;
 }
 
 export interface CreateTicketForm {

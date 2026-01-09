@@ -6,6 +6,8 @@ import { useParams } from 'next/navigation';
 import { movieService, Movie } from '@/lib/services/movieService';
 import CGVHeader from '@/components/cgv/CGVHeader';
 import CGVFooter from '@/components/cgv/CGVFooter';
+import BackButton from '@/components/ui/BackButton';
+import ImageHoverZoom from '@/components/ui/ImageHoverZoom';
 import { 
   PlayCircleFilled, 
   ShoppingCartOutlined
@@ -66,13 +68,14 @@ export default function MovieDetailPage() {
         <CGVHeader />
         <div className="flex flex-col items-center justify-center min-h-screen bg-white">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Không tìm thấy phim</h1>
-          <Link href="/cgv">
-            <button className="px-6 py-2 bg-red-600 text-white rounded font-bold hover:bg-red-700 transition-all">
-              Quay về trang chủ
-            </button>
-          </Link>
+          <div className="container mx-auto px-4 py-8">
+            <BackButton 
+              onClick={() => window.history.back()}
+              text="Quay lại danh sách phim"
+            />
+          </div>
+          <CGVFooter />
         </div>
-        <CGVFooter />
       </>
     );
   }
@@ -98,13 +101,16 @@ export default function MovieDetailPage() {
               {/* Poster - Left Column */}
               <div className="lg:col-span-3">
                 {movie.poster_url ? (
-                  <img
-                    src={movie.poster_url}
-                    alt={movie.title}
-                    className="w-full shadow-lg"
-                  />
+                  <div className="aspect-2/3">
+                    <ImageHoverZoom
+                      src={movie.poster_url}
+                      alt={movie.title}
+                      className="w-full h-full rounded-lg shadow-lg"
+                      zoomLevel={2.5}
+                    />
+                  </div>
                 ) : (
-                  <div className="w-full aspect-[2/3] bg-gray-200 flex items-center justify-center">
+                  <div className="w-full aspect-2/3 bg-gray-200 flex items-center justify-center rounded-lg">
                     <PlayCircleFilled className="text-6xl text-gray-400" />
                   </div>
                 )}
@@ -189,6 +195,8 @@ export default function MovieDetailPage() {
         </div>
 
       </div>
+
+      <CGVFooter />
 
       {/* Trailer Modal */}
       {showTrailer && trailerEmbedUrl && (

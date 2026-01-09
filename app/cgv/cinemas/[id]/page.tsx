@@ -150,6 +150,7 @@ export default function CinemaDetailPage() {
       <CGVHeader />
       
       <div className="min-h-screen bg-[#fdfcf0]">
+
         {/* Cinema Header - Light Style */}
         {cinema ? (
           <div className="bg-[#fdfcf0] border-b-4 border-red-600 py-8">

@@ -10,10 +10,16 @@ export default function MoviesPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+  const [pagination, setPagination] = useState({
+    currentPage: 0,
+    totalPages: 0,
+    totalElements: 0,
+    size: 5
+  });
 
   useEffect(() => {
     fetchMovies();
-  }, [searchTerm, statusFilter]);
+  }, [searchTerm, statusFilter, pagination.currentPage]);
 
   const fetchMovies = async () => {
     try {
@@ -22,17 +28,26 @@ export default function MoviesPage() {
       const params: MovieFilterParams = {
         search: searchTerm || undefined,
         status: statusFilter || undefined,
-        page: 0,
-        size: 100
+        page: pagination.currentPage,
+        size: pagination.size
       };
       
       const data = await movieService.getMovies(params);
       setMovies(data.content || []);
+      setPagination(prev => ({
+        ...prev,
+        totalPages: data.totalPages || 0,
+        totalElements: data.totalElements || 0
+      }));
     } catch (error) {
       console.error('Error fetching movies:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handlePageChange = (page: number) => {
+    setPagination(prev => ({ ...prev, currentPage: page }));
   };
 
   const handleDelete = async (movie: Movie) => {
@@ -156,6 +171,13 @@ export default function MoviesPage() {
           onDelete={handleDelete}
           onEdit={handleEdit}
           onView={handleView}
+          pagination={{
+            currentPage: pagination.currentPage,
+            totalPages: pagination.totalPages,
+            totalElements: pagination.totalElements,
+            size: pagination.size,
+            onPageChange: handlePageChange
+          }}
         />
       )}
     </div>

@@ -33,23 +33,23 @@ export default function HeroBanner() {
   const carouselRef = React.useRef<any>(null);
 
   return (
-    <div className="relative bg-[#fdfcf0] pb-8 pt-4 overflow-hidden">
+    <div className="relative bg-[#fdfcf0] pb-6 sm:pb-8 pt-2 sm:pt-4 overflow-hidden">
       
       {/* Pattern nền mờ ảo phía sau */}
       <div className="absolute inset-0 opacity-30 pointer-events-none" 
            style={{ backgroundImage: 'radial-gradient(#d90000 0.5px, transparent 0.5px)', backgroundSize: '20px 20px' }}></div>
 
-      <div className="container mx-auto px-4 relative z-10">
+      <div className="container mx-auto px-2 sm:px-3 md:px-4 lg:px-6 relative z-10">
         
         {/* Khung chứa Carousel với hiệu ứng đổ bóng Neon */}
-        <div className="relative group rounded-2xl overflow-hidden shadow-[0_10px_40px_-10px_rgba(220,38,38,0.5)] border-4 border-white ring-4 ring-red-100">
+        <div className="relative group rounded-xl sm:rounded-2xl overflow-hidden shadow-[0_10px_40px_-10px_rgba(220,38,38,0.5)] border-2 sm:border-4 border-white ring-2 sm:ring-4 ring-red-100">
           
           {/* Nút Previous - Cách điệu Glassmorphism */}
           <button
             onClick={() => carouselRef.current?.prev()}
-            className="absolute left-4 top-1/2 -translate-y-1/2 z-30 w-12 h-12 flex items-center justify-center bg-white/10 backdrop-blur-md border border-white/30 text-white rounded-full hover:bg-red-600 hover:border-red-600 hover:scale-110 hover:shadow-[0_0_15px_rgba(220,38,38,0.8)] transition-all duration-300 opacity-0 group-hover:opacity-100 translate-x-[-20px] group-hover:translate-x-0"
+            className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-30 w-8 h-8 sm:w-12 sm:h-12 flex items-center justify-center bg-white/10 backdrop-blur-md border border-white/30 text-white rounded-full hover:bg-red-600 hover:border-red-600 hover:scale-110 hover:shadow-[0_0_15px_rgba(220,38,38,0.8)] transition-all duration-300 opacity-0 group-hover:opacity-100 translate-x-[-20px] group-hover:translate-x-0"
           >
-            <LeftOutlined className="text-xl" />
+            <LeftOutlined className="text-sm sm:text-xl" />
           </button>
 
           {/* Carousel */}
@@ -61,7 +61,7 @@ export default function HeroBanner() {
             dots={{ className: 'custom-dots-cgv' }}
           >
             {banners.map((banner) => (
-              <div key={banner.id} className="relative w-full h-[350px] md:h-[500px] overflow-hidden">
+              <div key={banner.id} className="relative w-full h-[280px] sm:h-[350px] md:h-[450px] lg:h-[500px] overflow-hidden">
                 
                 {/* 1. IMAGE LAYER with Ken Burns Effect (Zoom chậm) */}
                 <div className="absolute inset-0 w-full h-full animate-ken-burns">
@@ -78,30 +78,30 @@ export default function HeroBanner() {
                 <div className="absolute inset-0 bg-gradient-to-r from-red-900/40 via-transparent to-transparent mix-blend-multiply"></div>
 
                 {/* 3. CONTENT LAYER */}
-                <div className="relative z-20 h-full flex flex-col items-center justify-center text-center px-4 md:px-20 mt-8">
+                <div className="relative z-20 h-full flex flex-col items-center justify-center text-center px-2 sm:px-4 md:px-20 mt-4 sm:mt-8">
                   
                   {/* Tag nhỏ phía trên */}
-                  <span className="inline-flex items-center gap-1 bg-yellow-400 text-red-900 px-3 py-1 rounded-full text-xs md:text-sm font-black uppercase tracking-wider mb-4 animate-fade-in-up shadow-[0_0_15px_rgba(250,204,21,0.6)]">
-                    <FireFilled className="animate-pulse"/> {banner.tag}
+                  <span className="inline-flex items-center gap-1 bg-yellow-400 text-red-900 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs sm:text-sm font-black uppercase tracking-wider mb-2 sm:mb-4 animate-fade-in-up shadow-[0_0_15px_rgba(250,204,21,0.6)]">
+                    <FireFilled className="animate-pulse text-sm sm:text-base"/> {banner.tag}
                   </span>
 
                   {/* Title với hiệu ứng chữ Gradient */}
-                  <h2 className="text-4xl md:text-6xl font-black mb-3 uppercase font-sans tracking-tight animate-fade-in-up delay-100">
+                  <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-black mb-2 sm:mb-3 uppercase font-sans tracking-tight animate-fade-in-up delay-100">
                     <span className="bg-clip-text text-transparent bg-gradient-to-b from-white to-gray-300 drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)]">
                       {banner.title}
                     </span>
                   </h2>
 
                   {/* Description */}
-                  <p className="text-lg md:text-2xl text-gray-200 mb-8 font-medium max-w-2xl mx-auto animate-fade-in-up delay-200 drop-shadow-md">
+                  <p className="text-sm sm:text-base md:text-lg lg:text-2xl text-gray-200 mb-4 sm:mb-8 font-medium max-w-xs sm:max-w-lg lg:max-w-2xl mx-auto animate-fade-in-up delay-200 drop-shadow-md">
                     {banner.description}
                   </p>
                   
                   {/* Button - Hiệu ứng trượt sáng (Shine) */}
                   <div className="animate-fade-in-up delay-300">
-                    <button className="relative overflow-hidden group/btn bg-gradient-to-r from-red-600 to-red-700 text-white px-10 py-3.5 rounded-full font-bold text-lg shadow-[0_10px_20px_rgba(185,28,28,0.4)] hover:shadow-[0_15px_30px_rgba(185,28,28,0.6)] hover:-translate-y-1 transition-all duration-300 border-b-4 border-red-900 active:border-b-0 active:translate-y-0">
-                      <span className="relative z-10 flex items-center gap-2">
-                        XEM CHI TIẾT <StarFilled className="text-yellow-300 animate-spin-slow"/>
+                    <button className="relative overflow-hidden group/btn bg-gradient-to-r from-red-600 to-red-700 text-white px-6 sm:px-8 lg:px-10 py-2 sm:py-3 lg:py-3.5 rounded-full font-bold text-sm sm:text-base lg:text-lg shadow-[0_10px_20px_rgba(185,28,28,0.4)] hover:shadow-[0_15px_30px_rgba(185,28,28,0.6)] hover:-translate-y-1 transition-all duration-300 border-b-2 sm:border-b-4 border-red-900 active:border-b-0 active:translate-y-0">
+                      <span className="relative z-10 flex items-center gap-1 sm:gap-2">
+                        XEM CHI TIẾT <StarFilled className="text-yellow-300 animate-spin-slow text-sm sm:text-base"/>
                       </span>
                       {/* Vệt sáng quét qua nút */}
                       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full group-hover/btn:animate-shine"></div>
@@ -116,9 +116,9 @@ export default function HeroBanner() {
           {/* Nút Next */}
           <button
             onClick={() => carouselRef.current?.next()}
-            className="absolute right-4 top-1/2 -translate-y-1/2 z-30 w-12 h-12 flex items-center justify-center bg-white/10 backdrop-blur-md border border-white/30 text-white rounded-full hover:bg-red-600 hover:border-red-600 hover:scale-110 hover:shadow-[0_0_15px_rgba(220,38,38,0.8)] transition-all duration-300 opacity-0 group-hover:opacity-100 translate-x-[20px] group-hover:translate-x-0"
+            className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-30 w-8 h-8 sm:w-12 sm:h-12 flex items-center justify-center bg-white/10 backdrop-blur-md border border-white/30 text-white rounded-full hover:bg-red-600 hover:border-red-600 hover:scale-110 hover:shadow-[0_0_15px_rgba(220,38,38,0.8)] transition-all duration-300 opacity-0 group-hover:opacity-100 translate-x-[20px] group-hover:translate-x-0"
           >
-            <RightOutlined className="text-xl" />
+            <RightOutlined className="text-sm sm:text-xl" />
           </button>
         </div>
       </div>

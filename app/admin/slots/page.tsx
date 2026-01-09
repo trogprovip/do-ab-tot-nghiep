@@ -6,31 +6,57 @@ import { Plus, Search } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { slotService, Slot } from '@/lib/services/slotService';
+import { DatePicker } from 'antd';
+import dayjs from 'dayjs';
+import 'antd/dist/reset.css';
 
 export default function SlotsPage() {
   const router = useRouter();
   const [slots, setSlots] = useState<Slot[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [dateFilter, setDateFilter] = useState<string>('');
+  const [selectedDate, setSelectedDate] = useState<dayjs.Dayjs | null>(null);
+  const [pagination, setPagination] = useState({
+    currentPage: 0,
+    totalPages: 0,
+    totalElements: 0,
+    size: 5
+  });
 
   useEffect(() => {
     fetchSlots();
-  }, [searchTerm]);
+  }, [searchTerm, dateFilter, pagination.currentPage]);
 
   const fetchSlots = async () => {
     try {
       setLoading(true);
       const response = await slotService.getSlots({
-        page: 0,
-        size: 100,
+        page: pagination.currentPage,
+        size: pagination.size,
         search: searchTerm || undefined,
+        date: dateFilter || undefined,
       });
       setSlots(response.content);
+      setPagination(prev => ({
+        ...prev,
+        totalPages: response.totalPages || 0,
+        totalElements: response.totalElements || 0
+      }));
     } catch (error) {
       console.error('Error fetching slots:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handlePageChange = (page: number) => {
+    setPagination(prev => ({ ...prev, currentPage: page }));
+  };
+
+  const handleDateChange = (date: dayjs.Dayjs | null) => {
+    setSelectedDate(date);
+    setDateFilter(date ? date.format('YYYY-MM-DD') : '');
   };
 
   const handleEdit = (row: Slot) => {
@@ -216,6 +242,21 @@ export default function SlotsPage() {
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
+          <div className="relative">
+            <DatePicker
+              value={selectedDate}
+              onChange={handleDateChange}
+              placeholder="Lọc theo ngày"
+              format="DD/MM/YYYY"
+              className="w-full"
+              style={{ 
+                padding: '8px 16px',
+                borderRadius: '8px',
+                border: '1px solid #d1d5db',
+                height: '40px'
+              }}
+            />
+          </div>
         </div>
       </div>
 
@@ -253,6 +294,13 @@ export default function SlotsPage() {
             data={slots}
             onEdit={handleEdit}
             onDelete={handleDelete}
+            pagination={{
+              currentPage: pagination.currentPage,
+              totalPages: pagination.totalPages,
+              totalElements: pagination.totalElements,
+              size: pagination.size,
+              onPageChange: handlePageChange
+            }}
           />
         </div>
       )}

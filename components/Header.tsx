@@ -2,23 +2,23 @@
 
 import React, { useState, useEffect } from 'react';
 import { Search, Mail, Bell, ChevronDown, Menu, LogOut } from 'lucide-react';
-import { authService, User } from '@/lib/services/authService';
+import { adminAuthService, User } from '@/lib/services/authService';
 import Link from 'next/link';
 
-export default function Header() {
+export default function AdminHeader() {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [showDropdown, setShowDropdown] = useState(false);
 
   useEffect(() => {
-    const user = authService.getCurrentUser();
+    const user = adminAuthService.getCurrentUser(); // ✅ Đổi thành adminAuthService
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setCurrentUser(user);
   }, []);
 
   const handleLogout = () => {
     if (confirm('Bạn có chắc chắn muốn đăng xuất?')) {
-      authService.logout();
+      adminAuthService.logout(); // ✅ Đổi thành adminAuthService
       setCurrentUser(null);
       setShowDropdown(false);
       setTimeout(() => {
@@ -82,40 +82,49 @@ export default function Header() {
                 )}
               </div>
             
-            <div className="relative">
+              <div className="relative">
                 {/* Avatar Ring */}
                 <div className="absolute -inset-0.5 bg-gradient-to-br from-red-500 to-yellow-500 rounded-full blur opacity-0 group-hover:opacity-70 transition duration-500"></div>
                 <div className="relative w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-md">
-                    {/* Placeholder Avatar Gradient or Image */}
-                    <div className="w-full h-full bg-gradient-to-tr from-blue-100 via-blue-300 to-blue-500 flex items-center justify-center">
-                        <span className="text-white font-bold text-sm">TD</span>
-                    </div>
-                    {/* Online Status Dot */}
-                    <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
+                  {/* Placeholder Avatar Gradient or Image */}
+                  <div className="w-full h-full bg-gradient-to-tr from-blue-100 via-blue-300 to-blue-500 flex items-center justify-center">
+                    <span className="text-white font-bold text-sm">
+                      {currentUser?.full_name?.substring(0, 2).toUpperCase() || 'AD'}
+                    </span>
+                  </div>
+                  {/* Online Status Dot */}
+                  <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
                 </div>
-            </div>
+              </div>
             
               <ChevronDown className="w-4 h-4 text-gray-400 group-hover:text-gray-600 transition-transform group-hover:rotate-180 hidden sm:block" />
             </div>
 
             {/* Dropdown Menu */}
             {showDropdown && currentUser && (
-              <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-gray-100 py-2 z-50">
-                <div className="px-4 py-3 border-b border-gray-100">
-                  <p className="text-sm font-bold text-gray-800">{currentUser.full_name}</p>
-                  <p className="text-xs text-gray-500 mt-1">{currentUser.email}</p>
-                  <span className="inline-block mt-2 px-2 py-1 bg-red-100 text-red-600 text-xs font-bold rounded">
-                    {currentUser.role === 'admin' ? 'ADMIN' : 'USER'}
-                  </span>
+              <>
+                {/* Backdrop để đóng dropdown khi click ra ngoài */}
+                <div 
+                  className="fixed inset-0 z-40" 
+                  onClick={() => setShowDropdown(false)}
+                />
+                <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-gray-100 py-2 z-50">
+                  <div className="px-4 py-3 border-b border-gray-100">
+                    <p className="text-sm font-bold text-gray-800">{currentUser.full_name}</p>
+                    <p className="text-xs text-gray-500 mt-1">{currentUser.email}</p>
+                    <span className="inline-block mt-2 px-2 py-1 bg-red-100 text-red-600 text-xs font-bold rounded">
+                      {currentUser.role === 'admin' ? 'ADMIN' : 'USER'}
+                    </span>
+                  </div>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Đăng xuất
+                  </button>
                 </div>
-                <button
-                  onClick={handleLogout}
-                  className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2"
-                >
-                  <LogOut className="w-4 h-4" />
-                  Đăng xuất
-                </button>
-              </div>
+              </>
             )}
           </div>
         </div>

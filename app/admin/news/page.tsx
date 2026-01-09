@@ -12,25 +12,44 @@ export default function NewsPage() {
   const [news, setNews] = useState<News[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [pagination, setPagination] = useState({
+    currentPage: 0,
+    totalPages: 0,
+    totalElements: 0,
+    size: 5
+  });
 
   useEffect(() => {
     fetchNews();
-  }, [searchTerm]);
+  }, [searchTerm, pagination.currentPage]);
 
   const fetchNews = async () => {
     try {
       setLoading(true);
       const response = await newsService.getNews({
-        page: 0,
-        size: 100,
+        page: pagination.currentPage,
+        size: pagination.size,
         search: searchTerm || undefined,
       });
       setNews(response.content);
+      setPagination(prev => ({
+        ...prev,
+        totalPages: response.totalPages || 0,
+        totalElements: response.totalElements || 0
+      }));
     } catch (error) {
       console.error('Error fetching news:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handlePageChange = (page: number) => {
+    setPagination(prev => ({ ...prev, currentPage: page }));
+  };
+
+  const handleView = (row: News) => {
+    router.push(`/admin/news/${row.id}`);
   };
 
   const handleEdit = (row: News) => {
@@ -121,6 +140,14 @@ export default function NewsPage() {
           data={news}
           onEdit={handleEdit}
           onDelete={handleDelete}
+          onView={handleView}
+          pagination={{
+            currentPage: pagination.currentPage,
+            totalPages: pagination.totalPages,
+            totalElements: pagination.totalElements,
+            size: pagination.size,
+            onPageChange: handlePageChange
+          }}
         />
       )}
     </div>

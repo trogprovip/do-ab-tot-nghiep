@@ -3,6 +3,7 @@
 
 import React from 'react';
 import { Edit, Trash2, Eye } from 'lucide-react';
+import Pagination from './ui/Pagination';
 
 interface Column {
   key: string;
@@ -17,9 +18,16 @@ interface DataTableProps {
   onEdit?: (row: any) => void;
   onDelete?: (row: any) => void;
   onView?: (row: any) => void;
+  pagination?: {
+    currentPage: number;
+    totalPages: number;
+    totalElements: number;
+    size: number;
+    onPageChange: (page: number) => void;
+  };
 }
 
-export default function DataTable({ columns, data, onEdit, onDelete, onView }: DataTableProps) {
+export default function DataTable({ columns, data, onEdit, onDelete, onView, pagination }: DataTableProps) {
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
       <div className="overflow-x-auto">
@@ -105,6 +113,15 @@ export default function DataTable({ columns, data, onEdit, onDelete, onView }: D
           </tbody>
         </table>
       </div>
+      {pagination && (
+        <Pagination
+          currentPage={pagination.currentPage}
+          totalPages={pagination.totalPages}
+          totalElements={pagination.totalElements}
+          size={pagination.size}
+          onPageChange={pagination.onPageChange}
+        />
+      )}
     </div>
   );
 }

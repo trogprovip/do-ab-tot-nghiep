@@ -9,7 +9,7 @@ import CGVFooter from '@/components/cgv/CGVFooter';
 
 export default function CGVHomePage() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white overflow-x-hidden">
       <CGVHeader />
       <main>
         <HeroBanner />

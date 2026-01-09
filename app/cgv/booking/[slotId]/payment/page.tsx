@@ -51,6 +51,8 @@ export default function PaymentPage({ params }: { params: Promise<{ slotId: stri
   const [loading, setLoading] = useState(true);
   const [paymentMethod, setPaymentMethod] = useState<string>('credit_card');
   const [countdown, setCountdown] = useState<number>(300); // 5 minutes = 300 seconds
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [ticketCode, setTicketCode] = useState<string>('');
   const [isExpired, setIsExpired] = useState<boolean>(false);
 
   const loadData = (id: string) => {
@@ -106,7 +108,92 @@ export default function PaymentPage({ params }: { params: Promise<{ slotId: stri
   };
 
   const handlePayment = async () => {
-    alert('Chức năng thanh toán đang được kết nối với cổng thanh toán...');
+    try {
+      // Get auth token
+      const token = localStorage.getItem('auth_token');
+      console.log('Token from localStorage:', token ? 'exists' : 'not found');
+      
+      if (!token) {
+        alert('Bạn cần đăng nhập để đặt vé');
+        router.push('/auth/login');
+        return;
+      }
+
+      // Fetch slot and seat information to calculate accurate prices
+      let selectedSeatsWithPrices: Array<{seat_id: number; seat_price: number}> = [];
+      
+      if (bookingData?.selectedSeats && bookingData.selectedSeats.length > 0) {
+        try {
+          // Fetch slot info to get base price
+          const slotRes = await fetch(`/api/slots/${slotId}`);
+          const slotData = await slotRes.json();
+          const basePrice = slotData.price || 0;
+
+          // Fetch seats for this room to get seat types and multipliers
+          const seatsRes = await fetch(`/api/seats?room_id=${slotData.rooms?.id}`);
+          const seatsData = await seatsRes.json();
+          const allSeats = seatsData.content || [];
+
+          // Calculate price for each selected seat
+          selectedSeatsWithPrices = bookingData.selectedSeats.map(seatId => {
+            const seat = allSeats.find((s: any) => s.id === seatId);
+            const multiplier = seat?.seattypes?.price_multiplier || 1;
+            const seatPrice = Math.round(basePrice * multiplier);
+            return {
+              seat_id: seatId,
+              seat_price: seatPrice
+            };
+          });
+        } catch (error) {
+          console.error('Error fetching seat pricing:', error);
+          // Fallback: distribute total price evenly
+          selectedSeatsWithPrices = bookingData.selectedSeats.map(seatId => ({
+            seat_id: seatId,
+            seat_price: Math.round((bookingData?.totalPrice || 0) / (bookingData?.selectedSeats.length || 1))
+          }));
+        }
+      }
+
+      const bookingRequest = {
+        slotId: parseInt(slotId),
+        selectedSeats: selectedSeatsWithPrices,
+        combos: comboData?.combos.map(combo => ({
+          product_id: combo.product.id,
+          quantity: combo.quantity,
+          unit_price: combo.product.price,
+          total_price: combo.product.price * combo.quantity,
+        })) || [],
+        totalAmount: getTotalAmount(),
+        finalAmount: getTotalAmount(),
+      };
+
+      // Call booking API
+      const response = await fetch('/api/bookings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(bookingRequest),
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        // Clear session storage
+        sessionStorage.removeItem(`booking_${slotId}`);
+        sessionStorage.removeItem(`combo_${slotId}`);
+        
+        // Show success modal
+        setTicketCode(result.data.tickets_code);
+        setShowSuccessModal(true);
+      } else {
+        alert(result.error || 'Đặt vé thất bại, vui lòng thử lại');
+      }
+    } catch (error) {
+      console.error('Payment error:', error);
+      alert('Có lỗi xảy ra, vui lòng thử lại');
+    }
   };
 
   const paymentMethods = [
@@ -321,6 +408,11 @@ export default function PaymentPage({ params }: { params: Promise<{ slotId: stri
                         <Text strong className="text-red-600">{bookingData?.seats.join(', ')}</Text>
                       </div>
                       
+                      <div className="flex justify-between items-center">
+                        <Text className="text-gray-500">Giá ghế</Text>
+                        <Text strong className="text-red-600">{(bookingData?.totalPrice || 0).toLocaleString('vi-VN')}đ</Text>
+                      </div>
+                      
                       {comboData && comboData.combos.length > 0 && (
                         <div className="space-y-2 pt-2">
                           <Text type="secondary" className="block uppercase text-[10px] tracking-widest font-bold">Combo đã chọn:</Text>
@@ -368,6 +460,62 @@ export default function PaymentPage({ params }: { params: Promise<{ slotId: stri
       </main>
 
       <CGVFooter />
+
+      {/* Success Modal */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 bg-white/30 backdrop-blur-md flex items-center justify-center z-50z">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 p-8 text-center transform scale-100 animate-fadeIn">
+            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <CheckCircleFilled className="text-5xl text-green-600" />
+            </div>
+            
+            <Title level={2} className="!mb-4 text-green-600">🎉 Đặt Vé Thành Công!</Title>
+            
+            <div className="bg-gray-50 rounded-xl p-4 mb-6">
+              <Text className="text-gray-600 block mb-2">Mã vé của bạn:</Text>
+              <div className="bg-red-600 text-white px-4 py-3 rounded-lg font-mono font-bold text-xl tracking-wider">
+                {ticketCode}
+              </div>
+            </div>
+            
+            <div className="space-y-3 mb-6 text-left">
+              <div className="flex items-center gap-3">
+                <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                <Text className="text-sm">Vé đã được xác nhận và lưu vào hệ thống</Text>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                <Text className="text-sm">Bạn có thể sử dụng mã vé để check-in tại rạp</Text>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                <Text className="text-sm">Vui lòng đến rạp trước 15 phút suất chiếu</Text>
+              </div>
+            </div>
+            
+            <div className="flex gap-3">
+              <Button 
+                size="large" 
+                className="flex-1"
+                onClick={() => router.push('/')}
+              >
+                Về Trang Chủ
+              </Button>
+              <Button 
+                type="primary" 
+                size="large" 
+                className="flex-1 bg-red-600 hover:bg-red-700"
+                onClick={() => {
+                  setShowSuccessModal(false);
+                  router.push('/');
+                }}
+              >
+                Đặt Vé Tiếp
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Animation đơn giản */}
       <style jsx global>{`

@@ -22,17 +22,23 @@ export default function UsersPage() {
   const [editingUserId, setEditingUserId] = useState<number | null>(null);
   const [editingRole, setEditingRole] = useState('');
   const [deletingUserId, setDeletingUserId] = useState<number | null>(null);
+  const [pagination, setPagination] = useState({
+    currentPage: 0,
+    totalPages: 0,
+    totalElements: 0,
+    size: 5
+  });
 
   useEffect(() => {
     fetchUsers();
-  }, [searchTerm, roleFilter]);
+  }, [searchTerm, roleFilter, pagination.currentPage]);
 
   const fetchUsers = async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams({
-        page: '0',
-        size: '100',
+        page: pagination.currentPage.toString(),
+        size: pagination.size.toString(),
         ...(searchTerm && { search: searchTerm }),
         ...(roleFilter && { role: roleFilter }),
       });
@@ -40,11 +46,20 @@ export default function UsersPage() {
       const response = await fetch(`/api/users?${params}`);
       const data = await response.json();
       setUsers(data.content || []);
+      setPagination(prev => ({
+        ...prev,
+        totalPages: data.totalPages || 0,
+        totalElements: data.totalElements || 0
+      }));
     } catch (error) {
       console.error('Error fetching users:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handlePageChange = (page: number) => {
+    setPagination(prev => ({ ...prev, currentPage: page }));
   };
 
   const handleEditRole = (userId: number, currentRole: string) => {
@@ -252,6 +267,13 @@ export default function UsersPage() {
         <DataTable
           columns={columns}
           data={users}
+          pagination={{
+            currentPage: pagination.currentPage,
+            totalPages: pagination.totalPages,
+            totalElements: pagination.totalElements,
+            size: pagination.size,
+            onPageChange: handlePageChange
+          }}
         />
       )}
     </div>

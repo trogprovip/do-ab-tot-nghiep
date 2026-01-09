@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect } from 'react';
 import DataTable from '@/components/DataTable';
-import { Search, Save, X, Trash2 } from 'lucide-react';
+import { Search, Save, X, Trash2, Eye } from 'lucide-react';
 import { ticketService, Ticket } from '@/lib/services/ticketService';
 
 export default function TicketsPage() {
@@ -18,6 +18,7 @@ export default function TicketsPage() {
   const [editingStatus, setEditingStatus] = useState<string>('');
   const [editingPaymentStatus, setEditingPaymentStatus] = useState<string>('');
   const [deletingTicketId, setDeletingTicketId] = useState<number | null>(null);
+  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
 
   useEffect(() => {
     fetchTickets();
@@ -83,6 +84,10 @@ export default function TicketsPage() {
     }
   };
 
+  const handleView = (ticket: Ticket) => {
+    setSelectedTicket(ticket);
+  };
+
   const handleDelete = async (ticketId: number, ticketCode: string) => {
     if (!confirm(`Bạn có chắc chắn muốn xóa vé "${ticketCode}"?`)) {
       return;
@@ -131,13 +136,13 @@ export default function TicketsPage() {
       label: 'Khách hàng',
       width: '200px',
       render: (value: any) => 
-        value ? `${value.full_name || value.username} (${value.email})` : '-'
+        value ? `${value.full_name} (${value.email})` : '-'
     },
     { 
       key: 'slots', 
       label: 'Suất chiếu',
       width: '280px',
-      render: (value: any) => {
+      render: (value: any, row: Ticket) => {
         if (!value) return '-';
         const movieTitle = value.movies?.title || 'N/A';
         const roomName = value.rooms?.room_name || 'N/A';
@@ -156,8 +161,8 @@ export default function TicketsPage() {
           }
         }
         
-        // Format giá vé
-        const price = value.price ? Number(value.price).toLocaleString('vi-VN') : '0';
+        // Format giá vé - lấy từ final_amount của ticket
+        const price = row.final_amount ? Number(row.final_amount).toLocaleString('vi-VN') : '0';
         
         return (
           <div>
@@ -239,9 +244,16 @@ export default function TicketsPage() {
     {
       key: 'actions',
       label: 'Hành động',
-      width: '120px',
+      width: '160px',
       render: (_value: string, row: Ticket) => (
         <div className="flex items-center gap-2">
+          <button
+            onClick={() => handleView(row)}
+            className="p-1 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded"
+            title="Xem chi tiết"
+          >
+            <Eye className="w-4 h-4" />
+          </button>
           {editingTicketId === row.id ? (
             <>
               <button
@@ -338,6 +350,234 @@ export default function TicketsPage() {
           columns={columns}
           data={filteredTickets}
         />
+      )}
+
+      {/* Modal chi tiết vé */}
+      {selectedTicket && (
+        <div className="fixed inset-0 bg-white/30 backdrop-blur-md flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-gray-900">Chi Tiết Vé</h2>
+              <button
+                onClick={() => setSelectedTicket(null)}
+                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-6">
+              {/* Thông tin vé */}
+              <div className="bg-blue-50 rounded-lg p-4">
+                <h3 className="text-lg font-semibold text-blue-900 mb-3">Thông Tin Vé</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-gray-600">Mã vé</p>
+                    <p className="font-medium text-gray-900">{selectedTicket.tickets_code}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600">Ngày đặt vé</p>
+                    <p className="font-medium text-gray-900">
+                      {selectedTicket.tickets_date ? new Date(selectedTicket.tickets_date).toLocaleDateString('vi-VN') : 'N/A'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Thông tin khách hàng */}
+              <div className="bg-green-50 rounded-lg p-4">
+                <h3 className="text-lg font-semibold text-green-900 mb-3">Thông Tin Khách Hàng</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-gray-600">Họ tên</p>
+                    <p className="font-medium text-gray-900">
+                      {selectedTicket.accounts?.full_name || 'N/A'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600">Email</p>
+                    <p className="font-medium text-gray-900">
+                      {selectedTicket.accounts?.email || 'N/A'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Thông tin suất chiếu */}
+              <div className="bg-purple-50 rounded-lg p-4">
+                <h3 className="text-lg font-semibold text-purple-900 mb-3">Thông Tin Suất Chiếu</h3>
+                <div className="space-y-3">
+                  <div>
+                    <p className="text-sm text-gray-600">Phim</p>
+                    <p className="font-medium text-gray-900">
+                      {selectedTicket.slots?.movies?.title || 'N/A'}
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-gray-600">Phòng chiếu</p>
+                      <p className="font-medium text-gray-900">
+                        {selectedTicket.slots?.rooms?.room_name || 'N/A'}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Thời gian chiếu</p>
+                      <p className="font-medium text-gray-900">
+                        {selectedTicket.slots?.show_time ? new Date(selectedTicket.slots.show_time).toLocaleString('vi-VN') : 'N/A'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Thông tin ghế đã đặt */}
+              {selectedTicket.bookingseats && selectedTicket.bookingseats.length > 0 && (
+                <div className="bg-indigo-50 rounded-lg p-4">
+                  <h3 className="text-lg font-semibold text-indigo-900 mb-3">Ghế Đã Đặt</h3>
+                  <div className="space-y-2">
+                    {selectedTicket.bookingseats.map((bookingSeat) => (
+                      <div key={bookingSeat.id} className="flex items-center justify-between bg-white rounded-lg p-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
+                            <span className="text-xs font-bold text-indigo-600">G</span>
+                          </div>
+                          <div>
+                            <p className="font-medium text-gray-900">Ghế {bookingSeat.seats.seat_number}</p>
+                            <p className="text-xs text-gray-500">{bookingSeat.seats.seattypes.type_name}</p>
+                          </div>
+                        </div>
+                        <p className="font-semibold text-indigo-600">
+                          {Number(bookingSeat.seat_price).toLocaleString('vi-VN')} đ
+                        </p>
+                      </div>
+                    ))}
+                    <div className="mt-3 pt-3 border-t border-indigo-200">
+                      <div className="flex justify-between items-center">
+                        <p className="font-medium text-gray-700">Tổng tiền ghế:</p>
+                        <p className="font-bold text-indigo-600">
+                          {selectedTicket.bookingseats.reduce((sum, seat) => sum + Number(seat.seat_price), 0).toLocaleString('vi-VN')} đ
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Thông tin sản phẩm đã mua */}
+              {selectedTicket.ticketsdetails && selectedTicket.ticketsdetails.length > 0 && (
+                <div className="bg-orange-50 rounded-lg p-4">
+                  <h3 className="text-lg font-semibold text-orange-900 mb-3">Sản Phẩm Đã Mua</h3>
+                  <div className="space-y-2">
+                    {selectedTicket.ticketsdetails.map((detail) => (
+                      <div key={detail.id} className="flex items-center justify-between bg-white rounded-lg p-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
+                            <span className="text-xs font-bold text-orange-600">
+                              {detail.products.category === 'food' ? 'F' : 
+                               detail.products.category === 'drink' ? 'D' : 
+                               detail.products.category === 'combo' ? 'C' : 'V'}
+                            </span>
+                          </div>
+                          <div>
+                            <p className="font-medium text-gray-900">{detail.products.product_name}</p>
+                            <p className="text-xs text-gray-500 capitalize">{detail.products.category}</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-medium text-orange-600">
+                            {Number(detail.unit_price).toLocaleString('vi-VN')} đ x {detail.quantity}
+                          </p>
+                          <p className="font-semibold text-orange-700">
+                            {Number(detail.total_price).toLocaleString('vi-VN')} đ
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                    <div className="mt-3 pt-3 border-t border-orange-200">
+                      <div className="flex justify-between items-center">
+                        <p className="font-medium text-gray-700">Tổng tiền sản phẩm:</p>
+                        <p className="font-bold text-orange-600">
+                          {selectedTicket.ticketsdetails.reduce((sum, item) => sum + Number(item.total_price), 0).toLocaleString('vi-VN')} đ
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Thông tin thanh toán */}
+              <div className="bg-yellow-50 rounded-lg p-4">
+                <h3 className="text-lg font-semibold text-yellow-900 mb-3">Thông Tin Thanh Toán</h3>
+                <div className="space-y-3">
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <p className="text-sm text-gray-600">Tổng tiền</p>
+                      <p className="font-medium text-gray-900">
+                        {Number(selectedTicket.total_amount || 0).toLocaleString('vi-VN')} đ
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Giảm giá</p>
+                      <p className="font-medium text-gray-900">
+                        {Number(selectedTicket.discount_amount || 0).toLocaleString('vi-VN')} đ
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Thành tiền</p>
+                      <p className="font-bold text-lg text-blue-600">
+                        {Number(selectedTicket.final_amount || 0).toLocaleString('vi-VN')} đ
+                      </p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-gray-600">Trạng thái thanh toán</p>
+                      <div className="mt-1">
+                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                          selectedTicket.payment_status === 'paid' ? 'bg-green-100 text-green-800' :
+                          selectedTicket.payment_status === 'unpaid' ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-gray-100 text-gray-800'
+                        }`}>
+                          {paymentStatusMap[selectedTicket.payment_status] || selectedTicket.payment_status}
+                        </span>
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Trạng thái vé</p>
+                      <div className="mt-1">
+                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                          selectedTicket.status === 'confirmed' ? 'bg-blue-100 text-blue-800' :
+                          selectedTicket.status === 'used' ? 'bg-green-100 text-green-800' :
+                          selectedTicket.status === 'cancelled' ? 'bg-red-100 text-red-800' :
+                          'bg-yellow-100 text-yellow-800'
+                        }`}>
+                          {statusMap[selectedTicket.status] || selectedTicket.status}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Ghi chú */}
+              {selectedTicket.note && (
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Ghi Chú</h3>
+                  <p className="text-gray-700">{selectedTicket.note}</p>
+                </div>
+              )}
+            </div>
+
+            <div className="sticky bottom-0 bg-white border-t border-gray-200 px-6 py-4 flex justify-end gap-3">
+              <button
+                onClick={() => setSelectedTicket(null)}
+                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Đóng
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
