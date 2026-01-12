@@ -33,7 +33,16 @@ export async function GET(request: NextRequest) {
         },
         bookingseats: {
           include: {
-            seats: true,
+            seats: {
+              include: {
+                seattypes: true,
+              },
+            },
+          },
+        },
+        ticketsdetails: {
+          include: {
+            products: true,
           },
         },
       },
@@ -58,6 +67,11 @@ export async function GET(request: NextRequest) {
         status: booking.status === 'confirmed' ? 'COMPLETED' : 
                 booking.status === 'cancelled' ? 'CANCELLED' : 'UPCOMING',
         booking_date: booking.tickets_date?.toISOString() || booking.slots.show_time.toISOString(),
+        tickets_code: booking.tickets_code,
+        payment_status: booking.payment_status,
+        slots: booking.slots,
+        bookingseats: booking.bookingseats,
+        ticketsdetails: booking.ticketsdetails,
       };
     });
 

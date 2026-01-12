@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Spin, Avatar, Button, Tabs, Card } from 'antd';
+import { Spin, Avatar, Button, Tabs, Card, Tag } from 'antd';
 import { 
   UserOutlined, 
   HistoryOutlined, 
@@ -12,7 +12,13 @@ import {
   PhoneOutlined,
   MailOutlined,
   EditOutlined,
-  TagOutlined
+  TagOutlined,
+  CloseOutlined,
+  QrcodeOutlined,
+  ClockCircleOutlined,
+  CheckCircleFilled,
+  PlayCircleOutlined,
+  StarOutlined
 } from '@ant-design/icons';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -41,6 +47,42 @@ interface BookingHistory {
   total_price: number;
   status: string;
   booking_date: string;
+  tickets_code?: string;
+  payment_status?: string;
+  slots?: {
+    movies: {
+      title: string;
+      poster?: string;
+    };
+    rooms: {
+      room_name: string;
+      cinemas?: {
+        cinema_name: string;
+      };
+    };
+    show_time: string;
+  };
+  bookingseats?: Array<{
+    id: number;
+    seat_price: number;
+    seats: {
+      seat_number: string;
+      seat_row: string;
+      seattypes: {
+        type_name: string;
+      };
+    };
+  }>;
+  ticketsdetails?: Array<{
+    id: number;
+    quantity: number;
+    unit_price: number;
+    total_price: number;
+    products: {
+      product_name: string;
+      category: 'food' | 'drink' | 'combo' | 'voucher';
+    };
+  }>;
 }
 
 interface FavoriteMovie {
@@ -58,6 +100,7 @@ export default function ProfilePage() {
   const [favorites, setFavorites] = useState<FavoriteMovie[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
+  const [selectedBooking, setSelectedBooking] = useState<BookingHistory | null>(null);
 
   // Check URL parameter for tab selection
   useEffect(() => {
@@ -276,115 +319,367 @@ export default function ProfilePage() {
           </div>
 
           {/* Tabs Content */}
-          <Tabs 
-            activeKey={activeTab} 
-            onChange={setActiveTab}
-            className="profile-tabs"
-            items={[
-              {
-                key: 'overview',
-                label: (
-                  <span className="flex items-center gap-2">
-                    <UserOutlined />
-                    Tổng Quan
-                  </span>
-                ),
-                children: (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <Card className="text-center">
-                      <div className="text-3xl font-bold text-red-600 mb-2">{bookings.length}</div>
-                      <div className="text-gray-600">Lịch Đặt Vé</div>
-                    </Card>
-                    <Card className="text-center">
-                      <div className="text-3xl font-bold text-red-600 mb-2">{favorites.length}</div>
-                      <div className="text-gray-600">Phim Yêu Thích</div>
-                    </Card>
-                    <Card className="text-center">
-                      <div className="text-3xl font-bold text-red-600 mb-2">{user?.points?.toLocaleString()}</div>
-                      <div className="text-gray-600">Điểm Thưởng</div>
-                    </Card>
+<Tabs
+  activeKey={activeTab}
+  onChange={setActiveTab}
+  className="profile-tabs-premium"
+  items={[
+    {
+      key: 'overview',
+      label: (
+        <span className="flex items-center gap-2 py-2">
+          <UserOutlined className="text-lg" />
+          <span className="font-semibold tracking-wide">TỔNG QUAN</span>
+        </span>
+      ),
+      children: (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 p-2">
+          {[
+            { label: 'Lịch Đặt Vé', count: bookings.length, icon: <HistoryOutlined />, color: 'bg-rose-50 text-rose-600' },
+            { label: 'Phim Yêu Thích', count: favorites.length, icon: <HeartOutlined />, color: 'bg-amber-50 text-amber-600' },
+            { label: 'Điểm Thưởng', count: user?.points?.toLocaleString(), icon: <StarOutlined />, color: 'bg-blue-50 text-blue-600' }
+          ].map((item, i) => (
+            <div key={i} className="relative group p-8 rounded-[2rem] bg-white border border-gray-100 shadow-[0_10px_30px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] transition-all duration-300 overflow-hidden">
+              <div className={`absolute top-0 right-0 w-24 h-24 -mr-6 -mt-6 rounded-full opacity-20 transition-transform group-hover:scale-150 duration-500 ${item.color.split(' ')[0]}`} />
+              <div className={`${item.color} w-12 h-12 rounded-2xl flex items-center justify-center text-2xl mb-4 shadow-sm`}>
+                {item.icon}
+              </div>
+              <div className="text-4xl font-black text-gray-900 mb-1">{item.count}</div>
+              <div className="text-sm font-bold text-gray-400 uppercase tracking-widest">{item.label}</div>
+            </div>
+          ))}
+        </div>
+      )
+    },
+    {
+      key: 'bookings',
+      label: (
+        <span className="flex items-center gap-2 py-2">
+          <HistoryOutlined className="text-lg" />
+          <span className="font-semibold tracking-wide">LỊCH SỬ ĐẶT VÉ</span>
+        </span>
+      ),
+      children: (
+        <div className="space-y-6">
+          {bookings.map((booking) => (
+            <div key={booking.id} className="group relative flex flex-col md:flex-row bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-500">
+              {/* Phần "Cuống vé" bên trái */}
+              <div className="bg-gray-50 md:w-12 border-r border-dashed border-gray-200 flex items-center justify-center py-4">
+                <span className="md:-rotate-90 whitespace-nowrap text-[10px] font-bold text-gray-400 tracking-[0.3em] uppercase">
+                   {booking.tickets_code || 'CINEMA TICKET'}
+                </span>
+              </div>
+
+              {/* Nội dung vé */}
+              <div className="flex-1 p-6 flex flex-col md:flex-row justify-between gap-6">
+                <div className="flex-1">
+                  <div className="inline-block px-3 py-1 rounded-full bg-red-50 text-red-600 text-[10px] font-bold uppercase mb-3">
+                    Movie Booking
                   </div>
-                )
-              },
-              {
-                key: 'bookings',
-                label: (
-                  <span className="flex items-center gap-2">
-                    <HistoryOutlined />
-                    Lịch Sử Đặt Vé
-                  </span>
-                ),
-                children: (
-                  <div className="space-y-4">
-                    {bookings.map((booking) => (
-                      <Card key={booking.id} className="hover:shadow-md transition-shadow">
-                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                          <div>
-                            <h3 className="font-bold text-lg text-gray-800">{booking.movie_title}</h3>
-                            <p className="text-gray-600">{booking.cinema_name}</p>
-                            <p className="text-sm text-gray-500">
-                              {new Date(booking.showtime).toLocaleString('vi-VN', {
-                                weekday: 'long',
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit'
-                              })}
-                            </p>
-                            <p className="text-sm text-gray-500">Ghế: {booking.seats}</p>
-                          </div>
-                          <div className="text-right">
-                            <div className="text-lg font-bold text-red-600 mb-2">
-                              {booking.total_price.toLocaleString('vi-VN')}đ
-                            </div>
-                            <span className={`px-3 py-1 rounded-full text-xs font-bold ${getStatusColor(booking.status)}`}>
-                              {getStatusText(booking.status)}
-                            </span>
-                          </div>
-                        </div>
-                      </Card>
-                    ))}
+                  <h3 className="text-2xl font-black text-gray-800 mb-2 group-hover:text-red-600 transition-colors">
+                    {booking.movie_title}
+                  </h3>
+                  <div className="grid grid-cols-2 gap-4 mt-4">
+                    <div>
+                      <p className="text-[10px] font-bold text-gray-400 uppercase">Rạp</p>
+                      <p className="text-sm font-semibold text-gray-700">{booking.cinema_name}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-gray-400 uppercase">Ghế</p>
+                      <p className="text-sm font-bold text-red-600">{booking.seats}</p>
+                    </div>
+                    <div className="col-span-2">
+                      <p className="text-[10px] font-bold text-gray-400 uppercase">Thời gian</p>
+                      <p className="text-sm font-semibold text-gray-700">
+                        {new Date(booking.showtime).toLocaleString('vi-VN', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    </div>
                   </div>
-                )
-              },
-              {
-                key: 'favorites',
-                label: (
-                  <span className="flex items-center gap-2">
-                    <HeartOutlined />
-                    Phim Yêu Thích
-                  </span>
-                ),
-                children: (
-                  <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                    {favorites.map((movie) => (
-                      <Link key={movie.id} href={`/cgv/movies/${movie.id}`}>
-                        <div className="group cursor-pointer">
-                          <div className="aspect-2/3 rounded-lg overflow-hidden mb-2">
-                            <Image 
-                              src={movie.poster_url} 
-                              alt={movie.title}
-                              width={300}
-                              height={450}
-                              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                            />
-                          </div>
-                          <h4 className="font-bold text-sm text-gray-800 line-clamp-2 group-hover:text-red-600 transition-colors">
-                            {movie.title}
-                          </h4>
-                        </div>
-                      </Link>
-                    ))}
+                </div>
+
+                {/* Phần thanh toán */}
+                <div className="md:w-48 flex flex-col justify-between items-end border-t md:border-t-0 md:border-l border-dashed border-gray-200 pt-6 md:pt-0 md:pl-8">
+                  <div className="text-right">
+                    <p className="text-[10px] font-bold text-gray-400 uppercase mb-1">Tổng cộng</p>
+                    <div className="text-3xl font-black text-gray-900 leading-none">
+                      {booking.total_price.toLocaleString('vi-VN')}<span className="text-sm ml-1 font-bold">đ</span>
+                    </div>
                   </div>
-                )
-              }
-            ]}
-          />
+                  
+                  <div className="flex flex-col items-end gap-3 w-full">
+                    <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm ${getStatusColor(booking.status)}`}>
+                      {getStatusText(booking.status)}
+                    </span>
+                    <button
+                      onClick={() => setSelectedBooking(booking)}
+                      className="w-full py-2.5 bg-gray-900 hover:bg-red-600 text-white text-[11px] font-bold rounded-xl transition-all duration-300 active:scale-95 shadow-lg shadow-gray-200"
+                    >
+                      CHI TIẾT VÉ
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )
+    },
+    {
+      key: 'favorites',
+      label: (
+        <span className="flex items-center gap-2 py-2">
+          <HeartOutlined className="text-lg" />
+          <span className="font-semibold tracking-wide">YÊU THÍCH</span>
+        </span>
+      ),
+      children: (
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8">
+          {favorites.map((movie) => (
+            <Link key={movie.id} href={`/cgv/movies/${movie.id}`} className="group">
+              <div className="relative rounded-[2rem] overflow-hidden shadow-lg transition-all duration-500 group-hover:-translate-y-2 group-hover:shadow-2xl">
+                <div className="aspect-[2/3] overflow-hidden">
+                  <Image 
+                    src={movie.poster_url} 
+                    alt={movie.title}
+                    width={300}
+                    height={450}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  />
+                </div>
+                {/* Overlay khi hover */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col justify-end p-6">
+                  <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white mb-2 mx-auto">
+                    <PlayCircleOutlined className="text-2xl" />
+                  </div>
+                </div>
+              </div>
+              <h4 className="mt-4 font-bold text-sm text-gray-800 text-center px-2 group-hover:text-red-600 transition-colors line-clamp-1 italic">
+                {movie.title}
+              </h4>
+            </Link>
+          ))}
+        </div>
+      )
+    }
+  ]}
+/>
         </div>
       </div>
 
       <CGVFooter />
+
+      {/* Modal chi tiết vé */}
+      {selectedBooking && (
+        <div className="fixed inset-0 bg-white/30 backdrop-blur-md flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-gray-900">Chi Tiết Vé Của Bạn</h2>
+              <button
+                onClick={() => setSelectedBooking(null)}
+                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <CloseOutlined className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-6">
+              {/* Thông tin vé */}
+              <div className="bg-blue-50 rounded-lg p-4">
+                <h3 className="text-lg font-semibold text-blue-900 mb-3">Thông Tin Vé</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-gray-600">Mã vé</p>
+                    <p className="font-medium text-gray-900 font-mono">{selectedBooking.tickets_code || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600">Ngày đặt vé</p>
+                    <p className="font-medium text-gray-900">
+                      {new Date(selectedBooking.booking_date).toLocaleDateString('vi-VN')}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Thông tin suất chiếu */}
+              <div className="bg-purple-50 rounded-lg p-4">
+                <h3 className="text-lg font-semibold text-purple-900 mb-3">Thông Tin Suất Chiếu</h3>
+                <div className="space-y-3">
+                  <div>
+                    <p className="text-sm text-gray-600">Phim</p>
+                    <p className="font-medium text-gray-900">
+                      {selectedBooking.slots?.movies?.title || selectedBooking.movie_title}
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-gray-600">Phòng chiếu</p>
+                      <p className="font-medium text-gray-900">
+                        {selectedBooking.slots?.rooms?.room_name || 'N/A'}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Rạp</p>
+                      <p className="font-medium text-gray-900">
+                        {selectedBooking.slots?.rooms?.cinemas?.cinema_name || selectedBooking.cinema_name}
+                      </p>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600">Thời gian chiếu</p>
+                    <p className="font-medium text-gray-900">
+                      {new Date(selectedBooking.slots?.show_time || selectedBooking.showtime).toLocaleString('vi-VN')}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Thông tin ghế đã đặt */}
+              {selectedBooking.bookingseats && selectedBooking.bookingseats.length > 0 && (
+                <div className="bg-indigo-50 rounded-lg p-4">
+                  <h3 className="text-lg font-semibold text-indigo-900 mb-3">Ghế Đã Đặt</h3>
+                  <div className="space-y-2">
+                    {selectedBooking.bookingseats.map((bookingSeat) => (
+                      <div key={bookingSeat.id} className="flex items-center justify-between bg-white rounded-lg p-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
+                            <span className="text-xs font-bold text-indigo-600">G</span>
+                          </div>
+                          <div>
+                            <p className="font-medium text-gray-900">Ghế {bookingSeat.seats.seat_row}{bookingSeat.seats.seat_number}</p>
+                            <p className="text-xs text-gray-500">{bookingSeat.seats.seattypes.type_name}</p>
+                          </div>
+                        </div>
+                        <p className="font-semibold text-indigo-600">
+                          {Number(bookingSeat.seat_price).toLocaleString('vi-VN')} đ
+                        </p>
+                      </div>
+                    ))}
+                    <div className="mt-3 pt-3 border-t border-indigo-200">
+                      <div className="flex justify-between items-center">
+                        <p className="font-medium text-gray-700">Tổng tiền ghế:</p>
+                        <p className="font-bold text-indigo-600">
+                          {selectedBooking.bookingseats.reduce((sum, seat) => sum + Number(seat.seat_price), 0).toLocaleString('vi-VN')} đ
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Thông tin sản phẩm đã mua */}
+              {selectedBooking.ticketsdetails && selectedBooking.ticketsdetails.length > 0 && (
+                <div className="bg-orange-50 rounded-lg p-4">
+                  <h3 className="text-lg font-semibold text-orange-900 mb-3">Sản Phẩm Đã Mua</h3>
+                  <div className="space-y-2">
+                    {selectedBooking.ticketsdetails.map((detail) => (
+                      <div key={detail.id} className="flex items-center justify-between bg-white rounded-lg p-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
+                            <span className="text-xs font-bold text-orange-600">
+                              {detail.products.category === 'food' ? 'F' : 
+                               detail.products.category === 'drink' ? 'D' : 
+                               detail.products.category === 'combo' ? 'C' : 'V'}
+                            </span>
+                          </div>
+                          <div>
+                            <p className="font-medium text-gray-900">{detail.products.product_name}</p>
+                            <p className="text-xs text-gray-500 capitalize">{detail.products.category}</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-medium text-orange-600">
+                            {Number(detail.unit_price).toLocaleString('vi-VN')} đ x {detail.quantity}
+                          </p>
+                          <p className="font-semibold text-orange-700">
+                            {Number(detail.total_price).toLocaleString('vi-VN')} đ
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                    <div className="mt-3 pt-3 border-t border-orange-200">
+                      <div className="flex justify-between items-center">
+                        <p className="font-medium text-gray-700">Tổng tiền sản phẩm:</p>
+                        <p className="font-bold text-orange-600">
+                          {selectedBooking.ticketsdetails.reduce((sum, item) => sum + Number(item.total_price), 0).toLocaleString('vi-VN')} đ
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Thông tin thanh toán */}
+              <div className="bg-yellow-50 rounded-lg p-4">
+                <h3 className="text-lg font-semibold text-yellow-900 mb-3">Thông Tin Thanh Toán</h3>
+                <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-gray-600">Tổng tiền</p>
+                      <p className="font-medium text-gray-900">
+                        {selectedBooking.total_price.toLocaleString('vi-VN')} đ
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Trạng thái thanh toán</p>
+                      <div className="mt-1">
+                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                          selectedBooking.payment_status === 'paid' ? 'bg-green-100 text-green-800' :
+                          selectedBooking.payment_status === 'unpaid' ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-gray-100 text-gray-800'
+                        }`}>
+                          {selectedBooking.payment_status === 'paid' ? 'Đã thanh toán' :
+                           selectedBooking.payment_status === 'unpaid' ? 'Chưa thanh toán' :
+                           selectedBooking.payment_status || 'N/A'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600">Trạng thái vé</p>
+                    <div className="mt-1">
+                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                        selectedBooking.status === 'COMPLETED' ? 'bg-blue-100 text-blue-800' :
+                        selectedBooking.status === 'CANCELLED' ? 'bg-red-100 text-red-800' :
+                        'bg-yellow-100 text-yellow-800'
+                      }`}>
+                        {getStatusText(selectedBooking.status)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Hướng dẫn sử dụng vé */}
+              <div className="bg-green-50 rounded-lg p-4">
+                <h3 className="text-lg font-semibold text-green-900 mb-3">Hướng Dẫn Sử Dụng Vé</h3>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-3">
+                    <CheckCircleFilled className="text-green-600" />
+                    <p className="text-sm text-gray-700">Đến rạp trước 15 phút suất chiếu</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <QrcodeOutlined className="text-green-600" />
+                    <p className="text-sm text-gray-700">Xuất trình mã vé tại quầy check-in</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <ClockCircleOutlined className="text-green-600" />
+                    <p className="text-sm text-gray-700">Mang theo giấy tờ tùy thân để xác nhận</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="sticky bottom-0 bg-white border-t border-gray-200 px-6 py-4 flex justify-end gap-3">
+              <button
+                onClick={() => setSelectedBooking(null)}
+                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Đóng
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

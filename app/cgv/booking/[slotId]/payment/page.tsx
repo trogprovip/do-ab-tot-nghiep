@@ -119,6 +119,41 @@ export default function PaymentPage({ params }: { params: Promise<{ slotId: stri
         return;
       }
 
+      // Handle VNPay payment
+      if (paymentMethod === 'qr_code') {
+        const totalAmount = getTotalAmount();
+        const orderId = `BOOKING_${slotId}_${Date.now()}`;
+
+        try {
+          const response = await fetch('/api/payment/vnpay/create', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              amount: totalAmount,
+              orderId: orderId,
+              orderInfo: 'abcd',
+            }),
+          });
+
+          const result = await response.json();
+          console.log("result payment",result);
+
+          if (response.ok && result.success) {
+            // Redirect to VNPay
+            window.location.href = result.paymentUrl;
+            console.log(result.paymentUrl);
+          } else {
+            alert(result.error || 'Tạo thanh toán VNPay thất bại');
+          }
+        } catch (error) {
+          console.error('VNPay payment error:', error);
+          alert('Có lỗi xảy ra khi tạo thanh toán VNPay');
+        }
+        return;
+      }
+
       // Fetch slot and seat information to calculate accurate prices
       let selectedSeatsWithPrices: Array<{seat_id: number; seat_price: number}> = [];
       
@@ -337,16 +372,39 @@ export default function PaymentPage({ params }: { params: Promise<{ slotId: stri
 
                   {paymentMethod === 'qr_code' && (
                     <div className="text-center animate-fadeIn">
-                      <div className="bg-white p-4 shadow-xl rounded-2xl inline-block border-2 border-gray-50 mb-4">
-                      <img 
-                        src={`https://img.vietqr.io/image/MBBank-8166666829999-compact.jpg?amount=${getTotalAmount()}&addInfo=PAY%20${slotId}&accountName=DUONG%20DINH%20TRONG`}
-                        alt="Payment QR" 
-                        className="w-[250px] h-[250px] object-contain"
-                      />
+                      <div className="bg-blue-50 p-6 rounded-xl border-2 border-dashed border-blue-200 text-center w-full max-w-md mb-4">
+                        <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                          <span className="text-white font-bold text-2xl">V</span>
+                        </div>
+                        <Title level={4} className="!text-blue-800 !m-0 mb-4">Thanh Toán VNPay</Title>
+                        <div className="space-y-3 text-left">
+                          <div className="flex items-center gap-3">
+                            <CheckCircleFilled className="text-green-600" />
+                            <Text className="text-sm">An toàn và bảo mật</Text>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <CheckCircleFilled className="text-green-600" />
+                            <Text className="text-sm">Hỗ trợ nhiều ngân hàng</Text>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <CheckCircleFilled className="text-green-600" />
+                            <Text className="text-sm">Xác nhận tức thì</Text>
+                          </div>
+                        </div>
+                        <div className="mt-4 p-3 bg-white rounded-lg">
+                          <Text type="secondary" className="text-xs">Số tiền:</Text>
+                          <p className="font-bold text-red-600 text-lg">{getTotalAmount().toLocaleString('vi-VN')}đ</p>
+                        </div>
                       </div>
-                      <p className="text-gray-500 italic flex items-center justify-center gap-2">
-                        <InfoCircleOutlined /> Mở ứng dụng ngân hàng của bạn để quét mã
-                      </p>
+                      
+                      <Button 
+                        type="primary" 
+                        size="large"
+                        className="w-full bg-blue-600 hover:bg-blue-700 h-12 font-semibold"
+                        onClick={handlePayment}
+                      >
+                        Thanh toán qua VNPay
+                      </Button>
                     </div>
                   )}
 
