@@ -6,7 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "update-used-tickets": "node scripts/update-used-tickets.js"
+  },
+  "prisma": {
+    "seed": "ts-node --compilerOptions {\"module\":\"CommonJS\"} prisma/seed-admin.ts"
   },
   "dependencies": {
     "@ant-design/icons": "^6.1.0",
@@ -39,6 +43,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.0.10",
     "tailwindcss": "^4",
+    "ts-node": "^10.9.2",
     "typescript": "^5"
   }
 }

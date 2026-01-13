@@ -298,6 +298,7 @@ enum tickets_status {
   pending
   confirmed
   cancelled
+  used
 }
 
 enum reviews_status {

@@ -74,7 +74,7 @@ export async function GET(request: NextRequest) {
       const bookingId = query.vnp_TxnRef.replace('BOOKING_', '');
       try {
         await updateBookingPaymentStatus(bookingId, 'confirmed', 'paid');
-        console.log(`✅ Updated booking ${bookingId} to paid status`);
+        console.log(`✅ Updated booking ${bookingId} from pending to confirmed/paid`);
       } catch (error) {
         console.error(`❌ Failed to update booking ${bookingId}:`, error);
       }

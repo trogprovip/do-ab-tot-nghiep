@@ -262,21 +262,21 @@ export default function ProfilePage() {
   };
 
   const getStatusColor = (status: string) => {
-    switch (status?.toUpperCase()) {
-      case 'COMPLETED': return 'bg-green-100 text-green-800';
-      case 'CANCELLED': return 'bg-red-100 text-red-800';
-      case 'UPCOMING': return 'bg-blue-100 text-blue-800';
-      case 'PENDING': return 'bg-yellow-100 text-yellow-800';
+    switch (status?.toLowerCase()) {
+      case 'confirmed': return 'bg-blue-100 text-blue-800';
+      case 'cancelled': return 'bg-red-100 text-red-800';
+      case 'used': return 'bg-green-100 text-green-800';
+      case 'pending': return 'bg-yellow-100 text-yellow-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
 
   const getStatusText = (status: string) => {
-    switch (status?.toUpperCase()) {
-      case 'COMPLETED': return 'Đã Xác Nhận';
-      case 'CANCELLED': return 'Đã Hủy';
-      case 'UPCOMING': return 'Sắp Chiếu';
-      case 'PENDING': return 'Chờ xác nhận';
+    switch (status?.toLowerCase()) {
+      case 'confirmed': return 'Đã xác nhận';
+      case 'cancelled': return 'Đã hủy';
+      case 'used': return 'Đã sử dụng';
+      case 'pending': return 'Chờ xét duyệt';
       default: return status;
     }
   };

@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation';
 import { slotService, Slot } from '@/lib/services/slotService';
 import { DatePicker } from 'antd';
 import dayjs from 'dayjs';
-import 'antd/dist/reset.css';
+import AntdProvider from '@/components/AntdProvider';
 
 export default function SlotsPage() {
   const router = useRouter();
@@ -243,19 +243,21 @@ export default function SlotsPage() {
             />
           </div>
           <div className="relative">
-            <DatePicker
-              value={selectedDate}
-              onChange={handleDateChange}
-              placeholder="Lọc theo ngày"
-              format="DD/MM/YYYY"
-              className="w-full"
-              style={{ 
-                padding: '8px 16px',
-                borderRadius: '8px',
-                border: '1px solid #d1d5db',
-                height: '40px'
-              }}
-            />
+            <AntdProvider>
+              <DatePicker
+                value={selectedDate}
+                onChange={handleDateChange}
+                placeholder="Lọc theo ngày"
+                format="DD/MM/YYYY"
+                className="w-full"
+                style={{ 
+                  padding: '8px 16px',
+                  borderRadius: '8px',
+                  border: '1px solid #d1d5db',
+                  height: '40px'
+                }}
+              />
+            </AntdProvider>
           </div>
         </div>
       </div>

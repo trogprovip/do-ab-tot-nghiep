@@ -6,7 +6,7 @@ import { movieService } from '@/lib/services/movieService';
 import { roomService } from '@/lib/services/roomService';
 import { DatePicker, TimePicker } from 'antd';
 import dayjs, { Dayjs } from 'dayjs';
-import 'antd/dist/reset.css';
+import AntdProvider from './AntdProvider';
 
 interface Movie {
   id: number;
@@ -217,70 +217,78 @@ const handleSubmit = async (e: React.FormEvent) => {
 
         <div>
           <label className="block text-sm font-medium mb-2">Ngày chiếu *</label>
-          <DatePicker
-            value={formData.show_date}
-            onChange={(date) => handleDateChange('show_date', date)}
-            placeholder="Chọn ngày chiếu"
-            format="DD/MM/YYYY"
-            className="w-full"
-            style={{ 
-              padding: '8px 16px',
-              borderRadius: '8px',
-              border: '1px solid #d1d5db',
-              height: '40px'
-            }}
-          />
+          <AntdProvider>
+            <DatePicker
+              value={formData.show_date}
+              onChange={(date) => handleDateChange('show_date', date)}
+              placeholder="Chọn ngày chiếu"
+              format="DD/MM/YYYY"
+              className="w-full"
+              style={{ 
+                padding: '8px 16px',
+                borderRadius: '8px',
+                border: '1px solid #d1d5db',
+                height: '40px'
+              }}
+            />
+          </AntdProvider>
         </div>
 
         <div>
           <label className="block text-sm font-medium mb-2">Giờ chiếu *</label>
-          <TimePicker
-            value={formData.show_time}
-            onChange={(time) => handleDateChange('show_time', time)}
-            placeholder="Chọn giờ chiếu"
-            format="HH:mm"
-            className="w-full"
-            style={{ 
-              padding: '8px 16px',
-              borderRadius: '8px',
-              border: '1px solid #d1d5db',
-              height: '40px'
-            }}
-          />
+          <AntdProvider>
+            <TimePicker
+              value={formData.show_time}
+              onChange={(time) => handleDateChange('show_time', time)}
+              placeholder="Chọn giờ chiếu"
+              format="HH:mm"
+              className="w-full"
+              style={{ 
+                padding: '8px 16px',
+                borderRadius: '8px',
+                border: '1px solid #d1d5db',
+                height: '40px'
+              }}
+            />
+          </AntdProvider>
         </div>
 
         <div>
           <label className="block text-sm font-medium mb-2">Ngày kết thúc *</label>
-          <DatePicker
-            value={formData.end_date}
-            onChange={(date) => handleDateChange('end_date', date)}
-            placeholder="Chọn ngày kết thúc"
-            format="DD/MM/YYYY"
-            className="w-full"
-            style={{ 
-              padding: '8px 16px',
-              borderRadius: '8px',
-              border: '1px solid #d1d5db',
-              height: '40px'
-            }}
-          />
+          <AntdProvider>
+            <DatePicker
+              value={formData.end_date}
+              onChange={(date) => handleDateChange('end_date', date)}
+              placeholder="Chọn ngày kết thúc"
+              format="DD/MM/YYYY"
+              className="w-full"
+              style={{ 
+                padding: '8px 16px',
+                borderRadius: '8px',
+                border: '1px solid #d1d5db',
+                height: '40px'
+              }}
+            />
+          </AntdProvider>
         </div>
 
         <div>
           <label className="block text-sm font-medium mb-2">Giờ kết thúc *</label>
-          <TimePicker
-            value={formData.end_time}
-            onChange={(time) => handleDateChange('end_time', time)}
-            placeholder="Chọn giờ kết thúc"
-            format="HH:mm"
-            className="w-full"
-            style={{ 
-              padding: '8px 16px',
-              borderRadius: '8px',
-              border: '1px solid #d1d5db',
-              height: '40px'
-            }}
-          />
+          <AntdProvider>
+            <TimePicker
+              value={formData.end_time}
+              onChange={(time) => handleDateChange('end_time', time)}
+              placeholder="Chọn giờ kết thúc"
+              format="HH:mm"
+              className="w-full"
+              style={{ 
+                padding: '8px 16px',
+                borderRadius: '8px',
+                border: '1px solid #d1d5db',
+                height: '40px'
+              }}
+            />
+          </AntdProvider>
         </div>
       </div>
 

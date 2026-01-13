@@ -156,7 +156,7 @@ export async function POST(request: NextRequest) {
           discount_amount: discountAmount || 0,
           final_amount: finalAmount,
           payment_status: 'unpaid', // Mặc định là chưa thanh toán
-          status: 'confirmed', // Xác nhận ngay khi đặt thành công
+          status: 'pending', // Bắt đầu với trạng thái chờ xét duyệt
           note: 'Đặt vé thành công qua hệ thống CGV',
           is_deleted: false,
         },

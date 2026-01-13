@@ -134,7 +134,7 @@ const fetchTickets = async () => {
 
   // Maps hiển thị tiếng Việt
   const statusMap: Record<string, string> = {
-    pending: 'Chờ xác nhận',
+    pending: 'Chờ xét duyệt',
     confirmed: 'Đã xác nhận',
     cancelled: 'Đã hủy',
     used: 'Đã sử dụng',
@@ -247,7 +247,7 @@ const fetchTickets = async () => {
               onChange={(e) => setEditingStatus(e.target.value)}
               className="px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="pending">Chờ xác nhận</option>
+            <option value="pending">Chờ xét duyệt</option>
               <option value="confirmed">Đã xác nhận</option>
               <option value="used">Đã sử dụng</option>
               <option value="cancelled">Đã hủy</option>
@@ -581,6 +581,7 @@ const fetchTickets = async () => {
                       <p className="text-sm text-gray-600">Trạng thái vé</p>
                       <div className="mt-1">
                         <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                          selectedTicket.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
                           selectedTicket.status === 'confirmed' ? 'bg-blue-100 text-blue-800' :
                           selectedTicket.status === 'used' ? 'bg-green-100 text-green-800' :
                           selectedTicket.status === 'cancelled' ? 'bg-red-100 text-red-800' :

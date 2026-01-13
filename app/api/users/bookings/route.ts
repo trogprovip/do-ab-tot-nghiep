@@ -64,8 +64,7 @@ export async function GET(request: NextRequest) {
         showtime: booking.slots.show_time.toISOString(),
         seats: seats,
         total_price: Number(booking.final_amount),
-        status: booking.status === 'confirmed' ? 'COMPLETED' : 
-                booking.status === 'cancelled' ? 'CANCELLED' : 'UPCOMING',
+        status: booking.status,
         booking_date: booking.tickets_date?.toISOString() || booking.slots.show_time.toISOString(),
         tickets_code: booking.tickets_code,
         payment_status: booking.payment_status,
