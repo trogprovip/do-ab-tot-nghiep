@@ -2,7 +2,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Star, MessageSquare, Send, ChevronLeft, ChevronRight, Filter, User } from 'lucide-react';
+import { Star, MessageSquare, Send, ChevronLeft, ChevronRight, Filter } from 'lucide-react';
+import Image from 'next/image';
+
 
 interface Review {
   id: number;
@@ -13,6 +15,7 @@ interface Review {
     id: number;
     username: string;
     full_name: string;
+    avatar_url?: string | null;
   };
 }
 
@@ -144,6 +147,31 @@ export default function MovieReviewSection({ movieId, userId }: MovieReviewSecti
     );
   };
 
+  const renderAvatar = (avatarUrl?: string | null, fullName?: string, className?: string) => {
+    if (avatarUrl) {
+      return (
+        <Image
+          src={avatarUrl}
+          alt={fullName || 'User avatar'}
+          width={40}
+          height={40}
+          className={`rounded-full object-cover ${className || ''}`}
+          onError={(e) => {
+            // Fallback to initial if image fails to load
+            (e.target as HTMLImageElement).style.display = 'none';
+            (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+          }}
+        />
+      );
+    }
+    
+    return (
+      <div className={`w-10 h-10 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-gray-500 font-bold text-sm shadow-sm border border-white ${className || ''}`}>
+        {fullName?.charAt(0).toUpperCase() || 'U'}
+      </div>
+    );
+  };
+
   const averageRating = reviews.length > 0
     ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
     : '0.0';
@@ -177,9 +205,9 @@ export default function MovieReviewSection({ movieId, userId }: MovieReviewSecti
       {userId && !hasReviewed && (
         <div className="p-6 bg-blue-50/30">
           <div className="flex gap-4">
-            {/* Avatar giả lập của người đang đánh giá */}
-            <div className="hidden sm:flex w-10 h-10 rounded-full bg-blue-100 items-center justify-center text-blue-600 flex-shrink-0">
-              <User className="w-5 h-5" />
+            {/* Avatar của người đang đánh giá */}
+            <div className="hidden sm:flex flex-shrink-0">
+              {renderAvatar(null, 'Bạn')}
             </div>
 
             <div className="flex-1">
@@ -262,9 +290,7 @@ export default function MovieReviewSection({ movieId, userId }: MovieReviewSecti
               <div key={review.id} className="flex gap-4 group">
                 {/* Avatar */}
                 <div className="flex-shrink-0">
-                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-gray-500 font-bold text-sm shadow-sm border border-white">
-                      {review.accounts.full_name.charAt(0).toUpperCase()}
-                   </div>
+                  {renderAvatar(review.accounts.avatar_url, review.accounts.full_name)}
                 </div>
 
                 {/* Content */}

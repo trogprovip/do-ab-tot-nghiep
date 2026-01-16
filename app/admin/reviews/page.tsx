@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import DataTable from '@/components/DataTable';
-import { Search, Trash2, Star, MessageSquare, Check, X } from 'lucide-react';
+import { Search, Trash2, Star, MessageSquare, Check, X, Eye } from 'lucide-react';
 
 interface Review {
   id: number;
@@ -34,6 +34,8 @@ export default function ReviewsPage() {
   const [statusFilter, setStatusFilter] = useState('');
   const [deletingReviewId, setDeletingReviewId] = useState<number | null>(null);
   const [processingReviewId, setProcessingReviewId] = useState<number | null>(null);
+  const [selectedReview, setSelectedReview] = useState<Review | null>(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
   const [pagination, setPagination] = useState({
     currentPage: 0,
     totalPages: 0,
@@ -153,6 +155,11 @@ export default function ReviewsPage() {
     }
   };
 
+  const handleViewDetail = (review: Review) => {
+    setSelectedReview(review);
+    setShowDetailModal(true);
+  };
+
   const renderStars = (rating: number) => {
     return (
       <div className="flex items-center gap-1">
@@ -259,9 +266,16 @@ export default function ReviewsPage() {
     {
       key: 'actions',
       label: 'Hành động',
-      width: '180px',
+      width: '220px',
       render: (_value: unknown, row: Review) => (
         <div className="flex items-center gap-1">
+          <button
+            onClick={() => handleViewDetail(row)}
+            className="p-1 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded"
+            title="Xem chi tiết"
+          >
+            <Eye className="w-4 h-4" />
+          </button>
           {row.status === 'pending' && (
             <>
               <button
@@ -388,6 +402,159 @@ export default function ReviewsPage() {
             onPageChange: handlePageChange
           }}
         />
+      )}
+      
+      {/* Modal Xem Chi Tiết Đánh Giá */}
+      {showDetailModal && selectedReview && (
+        <div className="fixed inset-0 bg-white/30 backdrop-blur-md flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-start mb-4">
+                <h2 className="text-2xl font-bold text-gray-900">Chi Tiết Đánh Giá</h2>
+                <button
+                  onClick={() => setShowDetailModal(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                {/* Thông tin phim */}
+                <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-lg">
+                  {selectedReview.movies.poster_url && (
+                    <img 
+                      src={selectedReview.movies.poster_url} 
+                      alt={selectedReview.movies.title}
+                      className="w-20 h-28 object-cover rounded"
+                    />
+                  )}
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                      {selectedReview.movies.title}
+                    </h3>
+                    <div className="flex items-center gap-2">
+                      {renderStars(selectedReview.rating)}
+                      <span className="text-sm font-semibold text-gray-700">
+                        {selectedReview.rating}/5
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Thông tin người dùng */}
+                <div className="p-4 bg-blue-50 rounded-lg">
+                  <h4 className="text-sm font-semibold text-blue-900 mb-2">Thông tin người đánh giá</h4>
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div>
+                      <span className="font-medium text-gray-600">Họ tên:</span>
+                      <span className="ml-2 text-gray-900">{selectedReview.accounts.full_name}</span>
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-600">Username:</span>
+                      <span className="ml-2 text-gray-900">@{selectedReview.accounts.username}</span>
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-600">Email:</span>
+                      <span className="ml-2 text-gray-900">{selectedReview.accounts.email}</span>
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-600">ID:</span>
+                      <span className="ml-2 text-gray-900">#{selectedReview.accounts.id}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Nội dung đánh giá */}
+                <div className="p-4 bg-yellow-50 rounded-lg">
+                  <h4 className="text-sm font-semibold text-yellow-900 mb-2">Nội dung đánh giá</h4>
+                  {selectedReview.comment ? (
+                    <div className="flex items-start gap-3">
+                      <MessageSquare className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" />
+                      <p className="text-gray-700 leading-relaxed">{selectedReview.comment}</p>
+                    </div>
+                  ) : (
+                    <p className="text-gray-500 italic">Không có bình luận</p>
+                  )}
+                </div>
+
+                {/* Thông tin hệ thống */}
+                <div className="p-4 bg-gray-100 rounded-lg">
+                  <h4 className="text-sm font-semibold text-gray-900 mb-2">Thông tin hệ thống</h4>
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div>
+                      <span className="font-medium text-gray-600">ID đánh giá:</span>
+                      <span className="ml-2 text-gray-900">#{selectedReview.id}</span>
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-600">Trạng thái:</span>
+                      <span className={`ml-2 px-2 py-1 rounded-full text-xs font-medium ${
+                        selectedReview.status === 'approved' ? 'bg-green-100 text-green-800' :
+                        selectedReview.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                        'bg-yellow-100 text-yellow-800'
+                      }`}>
+                        {selectedReview.status === 'approved' ? 'Đã duyệt' :
+                         selectedReview.status === 'rejected' ? 'Từ chối' : 'Chờ duyệt'}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-600">Ngày tạo:</span>
+                      <span className="ml-2 text-gray-900">
+                        {new Date(selectedReview.create_at).toLocaleString('vi-VN')}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-600">Cập nhật:</span>
+                      <span className="ml-2 text-gray-900">
+                        {selectedReview.update_at 
+                          ? new Date(selectedReview.update_at).toLocaleString('vi-VN')
+                          : 'Chưa cập nhật'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Các hành động */}
+                <div className="flex justify-end gap-2 pt-4 border-t">
+                  {selectedReview.status === 'pending' && (
+                    <>
+                      <button
+                        onClick={() => {
+                          handleApproveReview(selectedReview.id);
+                          setShowDetailModal(false);
+                        }}
+                        disabled={processingReviewId === selectedReview.id}
+                        className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {processingReviewId === selectedReview.id ? 'Đang xử lý...' : 'Phê duyệt'}
+                      </button>
+                      <button
+                        onClick={() => {
+                          handleRejectReview(selectedReview.id);
+                          setShowDetailModal(false);
+                        }}
+                        disabled={processingReviewId === selectedReview.id}
+                        className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {processingReviewId === selectedReview.id ? 'Đang xử lý...' : 'Từ chối'}
+                      </button>
+                    </>
+                  )}
+                  <button
+                    onClick={() => {
+                      handleDeleteReview(selectedReview.id, selectedReview.movies.title, selectedReview.accounts.username);
+                      setShowDetailModal(false);
+                    }}
+                    disabled={deletingReviewId === selectedReview.id}
+                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {deletingReviewId === selectedReview.id ? 'Đang xóa...' : 'Xóa đánh giá'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

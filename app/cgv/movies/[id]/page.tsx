@@ -106,7 +106,8 @@ export default function MovieDetailPage() {
 
   const toggleFavorite = async () => {
     if (!currentUser) {
-      alert('Vui lòng đăng nhập để thêm phim yêu thích');
+      // Redirect to login page instead of showing alert
+      window.location.href = '/auth/login';
       return;
     }
 

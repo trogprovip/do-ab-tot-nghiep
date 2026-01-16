@@ -13,6 +13,7 @@ import {
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { movieService, Movie } from '@/lib/services/movieService';
+import { authService, User } from '@/lib/services/authService';
 import CGVHeader from '@/components/cgv/CGVHeader';
 import CGVFooter from '@/components/cgv/CGVFooter';
 
@@ -30,8 +31,14 @@ export default function AllMoviesPage() {
   const [userFavorites, setUserFavorites] = useState<Set<number>>(new Set());
   const [isPending, startTransition] = useTransition();
   const [optimisticFavorites, setOptimisticFavorites] = useState<Set<number>>(new Set());
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   
   const pageSize = 12;
+
+  useEffect(() => {
+    const user = authService.getCurrentUser();
+    setCurrentUser(user);
+  }, []);
 
   useEffect(() => {
     fetchMovies();
@@ -80,8 +87,6 @@ export default function AllMoviesPage() {
       }
     });
   };
-
-  const getRatingBadge = (status: string | null) => 'T16';
   const formatDate = (date: Date | null) => date ? new Date(date).toLocaleDateString('vi-VN') : 'Đang cập nhật';
   
   const getMovieRating = (movie: Movie) => {
@@ -112,6 +117,12 @@ export default function AllMoviesPage() {
   };
 
   const toggleFavorite = async (movieId: number) => {
+    if (!currentUser) {
+      // Redirect to login page if user is not logged in
+      window.location.href = '/auth/login';
+      return;
+    }
+
     const isFavorited = optimisticFavorites.has(movieId);
     
     // Optimistic UI update - cập nhật ngay lập tức
@@ -368,11 +379,6 @@ export default function AllMoviesPage() {
                       {/* Poster Area */}
                       <div className="relative aspect-[2/3] overflow-hidden cursor-pointer">
                         {/* Badge Rating */}
-                        <div className="absolute top-3 left-3 z-20">
-                          <span className="bg-red-600 text-white text-xs font-extrabold px-2.5 py-1 rounded-md shadow-md border-2 border-white/30">
-                            {getRatingBadge(movie.status)}
-                          </span>
-                        </div>
 
                         {/* Image */}
                         {movie.poster_url ? (

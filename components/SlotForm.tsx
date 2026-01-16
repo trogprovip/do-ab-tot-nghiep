@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
-
 import React, { useState, useEffect } from 'react';
 import { movieService } from '@/lib/services/movieService';
 import { roomService } from '@/lib/services/roomService';

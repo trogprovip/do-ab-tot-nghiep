@@ -13,12 +13,19 @@ import {
 } from "@ant-design/icons";
 import Link from "next/link";
 import { movieService, Movie } from "@/lib/services/movieService";
+import { authService, User } from "@/lib/services/authService";
 
 export default function MovieSelection() {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [userFavorites, setUserFavorites] = useState<Set<number>>(new Set());
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const user = authService.getCurrentUser();
+    setCurrentUser(user);
+  }, []);
 
   useEffect(() => {
     const fetchMovies = async () => {
@@ -84,6 +91,12 @@ export default function MovieSelection() {
   };
 
   const toggleFavorite = async (movieId: number) => {
+    if (!currentUser) {
+      // Redirect to login page if user is not logged in
+      window.location.href = '/auth/login';
+      return;
+    }
+
     try {
       const isFavorited = userFavorites.has(movieId);
 
@@ -173,7 +186,6 @@ export default function MovieSelection() {
     }
   };
 
-  const getRatingBadge = (status: string | null) => "T16";
   const formatDate = (date: Date | null) =>
     date ? new Date(date).toLocaleDateString("vi-VN") : "Đang cập nhật";
 
@@ -249,12 +261,6 @@ export default function MovieSelection() {
                 >
                   {/* Poster Area */}
                   <div className="relative aspect-[2/3] overflow-hidden cursor-pointer">
-                    {/* Badge Rating - Màu sắc hơn */}
-                    <div className="absolute top-3 left-3 z-20">
-                      <span className="bg-red-600 text-white text-xs font-extrabold px-2.5 py-1 rounded-md shadow-md border-2 border-white/30">
-                        {getRatingBadge(movie.status)}
-                      </span>
-                    </div>
 
                     {/* Image with Zoom Effect */}
                     {movie.poster_url ? (

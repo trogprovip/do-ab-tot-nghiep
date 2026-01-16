@@ -42,6 +42,7 @@ export async function GET(
             id: true,
             username: true,
             full_name: true,
+            avatar_url: true,
           },
         },
       },

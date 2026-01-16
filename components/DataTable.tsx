@@ -83,7 +83,7 @@ export default function DataTable({ columns, data, onEdit, onDelete, onView, pag
                             className="text-blue-600 hover:text-blue-900 p-1"
                             title="Xem chi tiết"
                           >
-                            <Eye className="w-4 h-4" />
+                            <Eye className="w-4 h-4 text-blue-600" />
                           </button>
                         )}
                         {onEdit && (
@@ -92,7 +92,7 @@ export default function DataTable({ columns, data, onEdit, onDelete, onView, pag
                             className="text-green-600 hover:text-green-900 p-1"
                             title="Chỉnh sửa"
                           >
-                            <Edit className="w-4 h-4" />
+                            <Edit className="w-4 h-4 text-green-600" />
                           </button>
                         )}
                         {onDelete && (
@@ -101,7 +101,7 @@ export default function DataTable({ columns, data, onEdit, onDelete, onView, pag
                             className="text-red-600 hover:text-red-900 p-1"
                             title="Xóa"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <Trash2 className="w-4 h-4 text-red-600" />
                           </button>
                         )}
                       </div>

@@ -1,5 +1,4 @@
 'use client';
-
 import React, { useState, useEffect } from 'react';
 import DataTable from '@/components/DataTable';
 import { Plus, Search } from 'lucide-react';

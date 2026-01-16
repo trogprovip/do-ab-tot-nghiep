@@ -211,7 +211,7 @@ export default function UsersPage() {
             <>
               <button
                 onClick={() => handleEditRole(row.id, row.role)}
-                className="p-1 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded"
+                className="p-1 text-green-600 hover:text-green-700 hover:bg-blue-50 rounded"
                 title="Chỉnh sửa vai trò"
               >
                 <Edit className="w-4 h-4" />

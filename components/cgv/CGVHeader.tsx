@@ -39,7 +39,7 @@ export default function CGVHeader() {
   };
 
   const quickLinks = [
-    { href: '/cgv/cinemas', icon: <VideoCameraOutlined />, title: 'CGV CINEMAS', sub: 'TÌM RẠP GẦN BẠN' },
+    { href: '/cgv/cinemas', icon: <VideoCameraOutlined />, title: 'CGV CINEMAS', sub: 'RẠP CGV' },
     { href: '/cgv/movies?status=now_showing', icon: <PlayCircleOutlined />, title: 'NOW SHOWING', sub: 'PHIM ĐANG CHIẾU' },
     { href: '/cgv', icon: <StarOutlined />, title: 'CGV SPECIAL', sub: 'RẠP ĐẶC BIỆT' },
     { href: '/cgv', icon: <ShopOutlined />, title: 'GROUP SALES', sub: 'THUÊ RẠP & VÉ NHÓM' },
