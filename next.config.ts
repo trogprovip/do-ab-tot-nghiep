@@ -25,7 +25,14 @@ const nextConfig: NextConfig = {
   },
   reactCompiler: true,
   images: {
-    domains: ['tse2.mm.bing.net', 'tse3.mm.bing.net'],
+    domains: [
+      'tse1.mm.bing.net', 
+      'tse2.mm.bing.net', 
+      'tse3.mm.bing.net', 
+      'tse4.mm.bing.net',
+      'th.bing.com', 
+      'via.placeholder.com'
+    ],
   },
 };
 

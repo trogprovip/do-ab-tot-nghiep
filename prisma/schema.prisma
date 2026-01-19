@@ -22,6 +22,7 @@ model accounts {
   tickets       tickets[]
   favorites     favorites[]
   reviews       reviews[]
+  promotion_usages promotionusage[]
 }
 
 model bookingseats {
@@ -197,13 +198,18 @@ model tickets {
   status          tickets_status?         @default(pending)
   note            String?                 @db.Text
   is_deleted      Boolean?                @default(false)
+  promotion_id    Int?                    @db.UnsignedInt
+  promotion_code  String?                 @db.VarChar(50)
   bookingseats    bookingseats[]
   accounts        accounts                @relation(fields: [account_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "tickets_ibfk_1")
   slots           slots                   @relation(fields: [slot_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "tickets_ibfk_2")
   ticketsdetails  ticketsdetails[]
+  promotions      promotions?             @relation(fields: [promotion_id], references: [id])
+  promotion_usages promotionusage[]
 
   @@index([account_id], map: "account_id")
   @@index([slot_id], map: "slot_id")
+  @@index([promotion_id], map: "idx_tickets_promotion_id")
 }
 
 model ticketsdetails {
@@ -305,4 +311,60 @@ enum reviews_status {
   pending
   approved
   rejected
+}
+
+enum discount_type {
+  percentage
+  fixed_amount
+}
+
+enum promotions_status {
+  active
+  inactive
+  expired
+}
+
+model promotions {
+  id                  Int                     @id @default(autoincrement()) @db.UnsignedInt
+  promotion_code      String                  @unique @db.VarChar(50)
+  promotion_name      String                  @db.VarChar(200)
+  description         String?                 @db.Text
+  discount_type       discount_type
+  discount_value      Decimal                 @db.Decimal(10, 2)
+  max_discount_amount Decimal?                @db.Decimal(10, 2)
+  min_order_amount    Decimal                 @default(0) @db.Decimal(10, 2)
+  usage_limit         Int?                    @db.UnsignedInt
+  usage_count         Int                     @default(0) @db.UnsignedInt
+  usage_per_user      Int                     @default(1) @db.UnsignedInt
+  start_date          DateTime                @db.DateTime(0)
+  end_date            DateTime                @db.DateTime(0)
+  applicable_days     String?                 @db.VarChar(50)
+  applicable_movies    String?                 @db.Text
+  applicable_cinemas   String?                 @db.Text
+  status              promotions_status       @default(active)
+  image_url           String?                 @db.VarChar(255)
+  create_at           DateTime?               @default(now()) @db.DateTime(0)
+  update_at           DateTime?               @db.DateTime(0)
+  is_deleted          Boolean?                @default(false)
+  tickets             tickets[]
+  promotion_usages    promotionusage[]
+
+  @@index([promotion_code], map: "idx_promotion_code")
+  @@index([status], map: "idx_promotion_status")
+  @@index([start_date, end_date], map: "idx_promotion_dates")
+}
+
+model promotionusage {
+  id             Int      @id @default(autoincrement()) @db.UnsignedInt
+  promotion_id   Int      @db.UnsignedInt
+  account_id     Int      @db.UnsignedInt
+  tickets_id     Int      @db.UnsignedInt
+  discount_amount Decimal  @db.Decimal(10, 2)
+  used_at        DateTime? @default(now()) @db.DateTime(0)
+  promotions     promotions @relation(fields: [promotion_id], references: [id])
+  accounts       accounts   @relation(fields: [account_id], references: [id])
+  tickets        tickets    @relation(fields: [tickets_id], references: [id])
+
+  @@index([account_id], map: "idx_promotion_usage_account")
+  @@index([promotion_id], map: "idx_promotion_usage_promotion")
 }

@@ -28,6 +28,62 @@ async function updateBookingPaymentStatus(bookingId: string, status: string, pay
   }
 }
 
+// Helper function để cập nhật voucher usage khi thanh toán thành công
+async function updateVoucherUsage(bookingId: string) {
+  try {
+    const bookingIdNum = parseInt(bookingId);
+    if (isNaN(bookingIdNum)) {
+      throw new Error('Invalid booking ID');
+    }
+
+    // Lấy thông tin ticket để tìm promotion_id
+    const ticket = await prisma.tickets.findUnique({
+      where: { id: bookingIdNum },
+      select: { 
+        promotion_id: true,
+        account_id: true,
+        discount_amount: true
+      }
+    });
+
+    if (!ticket || !ticket.promotion_id) {
+      console.log(`📝 No voucher found for booking ${bookingId}`);
+      return;
+    }
+
+    // Cập nhật promotionusage với ticket_id thực tế
+    const updatedUsage = await prisma.promotionusage.updateMany({
+      where: {
+        account_id: ticket.account_id,
+        promotion_id: ticket.promotion_id,
+        tickets_id: 1, // Giá trị mặc định khi activate
+      },
+      data: {
+        tickets_id: bookingIdNum, // Cập nhật với ticket_id thực tế
+        discount_amount: ticket.discount_amount || 0,
+      }
+    });
+
+    console.log(`✅ Updated voucher usage for booking ${bookingId}:`, updatedUsage);
+
+    // Tăng số lần sử dụng của promotion
+    await prisma.promotions.update({
+      where: { id: ticket.promotion_id },
+      data: {
+        usage_count: {
+          increment: 1
+        }
+      }
+    });
+
+    console.log(`✅ Incremented promotion usage count for voucher ${ticket.promotion_id}`);
+
+  } catch (error) {
+    console.error('❌ Error updating voucher usage:', error);
+    // Không throw error để không ảnh hưởng đến payment flow
+  }
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -75,6 +131,10 @@ export async function GET(request: NextRequest) {
       try {
         await updateBookingPaymentStatus(bookingId, 'confirmed', 'paid');
         console.log(`✅ Updated booking ${bookingId} from pending to confirmed/paid`);
+        
+        // 2️⃣ Cập nhật voucher usage khi thanh toán thành công
+        await updateVoucherUsage(bookingId);
+        console.log(`✅ Updated voucher usage for booking ${bookingId}`);
       } catch (error) {
         console.error(`❌ Failed to update booking ${bookingId}:`, error);
       }

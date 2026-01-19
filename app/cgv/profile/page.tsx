@@ -19,7 +19,8 @@ import {
   ClockCircleOutlined,
   CheckCircleFilled,
   PlayCircleOutlined,
-  StarOutlined
+  StarOutlined,
+  GiftOutlined
 } from '@ant-design/icons';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -109,14 +110,39 @@ interface ReviewHistory {
   };
 }
 
+interface UserVoucher {
+  id: number;
+  title: string;
+  description: string;
+  discount_type: string;
+  discount_value: number;
+  code: string;
+  used_at: string;
+  expired_at: string;
+}
+
 export default function ProfilePage() {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [bookings, setBookings] = useState<BookingHistory[]>([]);
   const [favorites, setFavorites] = useState<FavoriteMovie[]>([]);
   const [reviews, setReviews] = useState<ReviewHistory[]>([]);
+  const [userVouchers, setUserVouchers] = useState<UserVoucher[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
   const [selectedBooking, setSelectedBooking] = useState<BookingHistory | null>(null);
+  const [selectedVoucher, setSelectedVoucher] = useState<UserVoucher | null>(null);
+  const [promotionCode, setPromotionCode] = useState('');
+  const [activatingVoucher, setActivatingVoucher] = useState(false);
+  const [voucherMessage, setVoucherMessage] = useState<{ type: 'success' | 'error' | ''; message: string }>({ type: '', message: '' });
+
+  // Helper function to get cookie
+  const getCookie = (name: string) => {
+    if (typeof document === 'undefined') return null;
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop()?.split(';').shift();
+    return null;
+  };
 
   // Check URL parameter for tab selection
   useEffect(() => {
@@ -134,6 +160,7 @@ export default function ProfilePage() {
     fetchBookingHistory();
     fetchFavoriteMovies();
     fetchReviewHistory();
+    fetchUserVouchers();
   }, []);
 
   // Listen for favorites updates from other pages
@@ -151,8 +178,16 @@ export default function ProfilePage() {
 
   const fetchUserData = async () => {
     try {
+      // Get token from cookies (not localStorage)
+      const token = getCookie('auth_token');
+      
       // Call API to get user data from database
-      const response = await fetch('/api/users/profile');
+      const response = await fetch('/api/users/profile', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
       
       if (!response.ok) {
         throw new Error('Failed to fetch user data');
@@ -185,8 +220,15 @@ export default function ProfilePage() {
 
   const fetchBookingHistory = async () => {
     try {
+      const token = getCookie('auth_token');
+      
       // Call API to get booking history from database
-      const response = await fetch('/api/users/bookings');
+      const response = await fetch('/api/users/bookings', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
       
       if (!response.ok) {
         throw new Error('Failed to fetch booking history');
@@ -208,8 +250,15 @@ export default function ProfilePage() {
 
   const fetchFavoriteMovies = async () => {
     try {
+      const token = getCookie('auth_token');
+      
       // Call API to get favorite movies from database
-      const response = await fetch('/api/users/favorites');
+      const response = await fetch('/api/users/favorites', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
       
       if (!response.ok) {
         throw new Error('Failed to fetch favorite movies');
@@ -233,7 +282,14 @@ export default function ProfilePage() {
 
   const fetchReviewHistory = async () => {
     try {
-      const response = await fetch('/api/users/reviews?size=100');
+      const token = getCookie('auth_token');
+      
+      const response = await fetch('/api/users/reviews?size=100', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
       
       if (!response.ok) {
         throw new Error('Failed to fetch review history');
@@ -249,6 +305,34 @@ export default function ProfilePage() {
     } catch (error) {
       console.error('Error fetching review history:', error);
       setReviews([]);
+    }
+  };
+
+  const fetchUserVouchers = async () => {
+    try {
+      const token = getCookie('auth_token');
+      
+      const response = await fetch('/api/user/vouchers', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch user vouchers');
+      }
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        setUserVouchers(result.data);
+      } else {
+        throw new Error(result.error || 'Failed to fetch user vouchers');
+      }
+    } catch (error) {
+      console.error('Error fetching user vouchers:', error);
+      setUserVouchers([]);
     }
   };
 
@@ -281,6 +365,56 @@ export default function ProfilePage() {
     }
   };
 
+  const handleActivateVoucher = async () => {
+    if (!promotionCode.trim()) {
+      setVoucherMessage({ type: 'error', message: 'Vui lòng nhập mã khuyến mại' });
+      return;
+    }
+
+    setActivatingVoucher(true);
+    setVoucherMessage({ type: '', message: '' });
+
+    try {
+      const token = getCookie('auth_token');
+      
+      const response = await fetch('/api/user/vouchers', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          promotion_code: promotionCode.trim().toUpperCase()
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setVoucherMessage({ 
+          type: 'success', 
+          message: `🎉 Kích hoạt thành công! Bạn nhận được ${result.data.discount_value}${result.data.discount_type === 'percentage' ? '%' : 'đ'} giảm giá` 
+        });
+        setPromotionCode('');
+        // Refresh vouchers after successful activation
+        await fetchUserVouchers();
+      } else {
+        setVoucherMessage({ 
+          type: 'error', 
+          message: result.error || 'Mã khuyến mại không hợp lệ hoặc đã hết hạn' 
+        });
+      }
+    } catch (error) {
+      console.error('Error activating voucher:', error);
+      setVoucherMessage({ 
+        type: 'error', 
+        message: 'Có lỗi xảy ra, vui lòng thử lại sau' 
+      });
+    } finally {
+      setActivatingVoucher(false);
+    }
+  };
+
   if (loading) {
     return (
       <>
@@ -294,7 +428,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <>
+    <div>
       <CGVHeader />
       
       <div className="min-h-screen bg-[#fdfcf0]">
@@ -615,6 +749,138 @@ export default function ProfilePage() {
           )}
         </div>
       )
+    },
+    {
+      key: 'promotions',
+      label: (
+        <span className="flex items-center gap-2 py-2">
+          <GiftOutlined className="text-lg" />
+          <span className="font-semibold tracking-wide">MÃ KHUYẾN MẠI</span>
+        </span>
+      ),
+      children: (
+<div className="max-w-4xl mx-auto space-y-8 p-4">
+  {/* Section 1: Kích hoạt mã khuyến mại */}
+  <div className="relative overflow-hidden bg-white rounded-3xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100">
+    {/* Decor nền nhẹ nhàng */}
+    <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-red-50 rounded-full blur-3xl opacity-50" />
+    
+    <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="flex items-center gap-4">
+        <div className="w-14 h-14 bg-gradient-to-tr from-red-600 to-orange-500 rounded-2xl flex items-center justify-center shadow-lg shadow-red-200">
+          <GiftOutlined className="text-2xl text-white" />
+        </div>
+        <div>
+          <h3 className="text-2xl font-extrabold text-gray-900 tracking-tight">Voucher Ưu Đãi</h3>
+          <p className="text-gray-500">Nhập mã khuyến mại để tiết kiệm chi phí</p>
+        </div>
+      </div>
+
+      <div className="flex w-full md:w-auto gap-2 p-1.5 bg-gray-50 rounded-2xl border border-gray-100">
+        <input
+          type="text"
+          placeholder="Nhập mã của bạn..."
+          value={promotionCode}
+          onChange={(e) => setPromotionCode(e.target.value)}
+          onKeyPress={(e) => e.key === 'Enter' && handleActivateVoucher()}
+          className="flex-1 md:w-64 px-4 py-3 bg-transparent focus:outline-none font-medium text-gray-700"
+        />
+        <button
+          onClick={handleActivateVoucher}
+          disabled={activatingVoucher}
+          className="px-8 py-3 bg-gray-900 hover:bg-red-600 disabled:bg-gray-300 text-white font-bold rounded-xl transition-all duration-300 active:scale-95 shadow-md"
+        >
+          {activatingVoucher ? '...' : 'Kích Hoạt'}
+        </button>
+      </div>
+    </div>
+
+    {/* Message display - Tinh tế hơn */}
+    {voucherMessage.message && (
+      <div className={`mt-4 flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium animate-in fade-in slide-in-from-top-2 ${
+        voucherMessage.type === 'success' 
+          ? 'bg-green-50 text-green-700 border border-green-100' 
+          : 'bg-red-50 text-red-700 border border-red-100'
+      }`}>
+        <span className="w-1.5 h-1.5 rounded-full bg-current" />
+        {voucherMessage.message}
+      </div>
+    )}
+  </div>
+
+  {/* Section 2: Kho voucher */}
+  <div>
+    <div className="flex items-center justify-between mb-6 px-2">
+      <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+        <div className="w-2 h-6 bg-red-600 rounded-full" />
+        Voucher của bạn <span className="text-gray-400 font-normal">({userVouchers.length})</span>
+      </h3>
+    </div>
+
+    {userVouchers.length === 0 ? (
+      <div className="bg-gray-50 rounded-3xl py-16 flex flex-col items-center border-2 border-dashed border-gray-200">
+        <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-4 shadow-sm">
+          <TagOutlined className="text-3xl text-gray-300" />
+        </div>
+        <p className="text-gray-500 font-medium">Kho ưu đãi đang trống</p>
+        <p className="text-gray-400 text-sm">Săn mã ngay để nhận quà bạn nhé!</p>
+      </div>
+    ) : (
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {userVouchers
+          .filter(voucher => new Date(voucher.expired_at) >= new Date())
+          .map((voucher) => (
+            <div key={voucher.id} className="group relative flex bg-white rounded-2xl overflow-hidden border border-gray-100 hover:border-red-200 hover:shadow-xl hover:shadow-red-500/5 transition-all duration-300">
+              {/* Left Side: Ticket Stub Design */}
+              <div className="w-32 bg-gradient-to-br from-red-600 to-red-500 p-4 flex flex-col items-center justify-center text-white relative border-r border-dashed border-white/30">
+                {/* Half circles for ticket effect */}
+                <div className="absolute -top-3 -right-3 w-6 h-6 bg-white rounded-full border border-gray-100" />
+                <div className="absolute -bottom-3 -right-3 w-6 h-6 bg-white rounded-full border border-gray-100" />
+                
+                <span className="text-xs font-medium opacity-80 uppercase tracking-wider">Giảm</span>
+                <span className="text-2xl font-black">
+                  {voucher.discount_type === 'percentage' ? `${voucher.discount_value}%` : `${voucher.discount_value/1000}k`}
+                </span>
+              </div>
+
+              {/* Right Side: Content */}
+              <div className="flex-1 p-5 flex flex-col justify-between">
+                <div>
+                  <div className="flex justify-between items-start">
+                    <h4 className="font-bold text-gray-900 line-clamp-1 group-hover:text-red-600 transition-colors">
+                      {voucher.title}
+                    </h4>
+                    <span className="text-[10px] font-bold bg-red-50 text-red-600 px-2 py-0.5 rounded uppercase">
+                      Mã: {voucher.code}
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1 line-clamp-2 leading-relaxed">
+                    {voucher.description}
+                  </p>
+                </div>
+
+                <div className="mt-4 flex items-center justify-between">
+                  <div className="flex flex-col">
+                    <span className="text-[10px] text-gray-400 uppercase">Hết hạn</span>
+                    <span className="text-xs font-semibold text-gray-700">
+                      {new Date(voucher.expired_at).toLocaleDateString('vi-VN')}
+                    </span>
+                  </div>
+                  <button 
+                    onClick={() => setSelectedVoucher(voucher)}
+                    className="text-xs font-bold text-red-600 hover:text-red-700 underline underline-offset-4"
+                  >
+                    Chi tiết
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+      </div>
+    )}
+  </div>
+</div>
+      )
     }
   ]}
 />
@@ -835,6 +1101,6 @@ export default function ProfilePage() {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }

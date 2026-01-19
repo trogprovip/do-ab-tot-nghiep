@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Film, Users, Ticket, ShoppingBag, DollarSign } from 'lucide-react';
+import { Film, Users, Ticket, ShoppingBag, DollarSign, Tag } from 'lucide-react';
+import Link from 'next/link';
 
 interface Stats {
   totalMovies: number;
@@ -123,22 +124,26 @@ export default function AdminPage() {
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <h2 className="text-xl font-semibold text-gray-900 mb-4">Quản lý nhanh</h2>
               <div className="space-y-3">
-                <a href="/admin/movies" className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                <Link href="/admin/movies" className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
                   <Film className="w-5 h-5 text-blue-600" />
                   <span className="text-gray-700">Quản lý Phim</span>
-                </a>
-                <a href="/admin/cinemas" className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                </Link>
+                <Link href="/admin/cinemas" className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
                   <ShoppingBag className="w-5 h-5 text-green-600" />
                   <span className="text-gray-700">Quản lý Rạp</span>
-                </a>
-                <a href="/admin/tickets" className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                </Link>
+                <Link href="/admin/tickets" className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
                   <Ticket className="w-5 h-5 text-purple-600" />
                   <span className="text-gray-700">Quản lý Vé</span>
-                </a>
-                <a href="/admin/users" className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                </Link>
+                <Link href="/admin/promotions" className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                  <Tag className="w-5 h-5 text-orange-600" />
+                  <span className="text-gray-700">Quản lý Khuyến mại</span>
+                </Link>
+                <Link href="/admin/users" className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
                   <Users className="w-5 h-5 text-orange-600" />
                   <span className="text-gray-700">Quản lý Người dùng</span>
-                </a>
+                </Link>
               </div>
             </div>
 

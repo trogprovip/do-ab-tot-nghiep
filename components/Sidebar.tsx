@@ -36,6 +36,7 @@ const menuGroups = [
       { icon: Star, label: 'Quản lý Đánh giá', href: '/admin/reviews' },
       { icon: Newspaper, label: 'Quản lý Tin tức', href: '/admin/news' },
       { icon: ShoppingBag, label: 'Quản lý Sản phẩm', href: '/admin/products' },
+      { icon: Tag, label: 'Quản lý Khuyến mại', href: '/admin/promotions' },
     ]
   },
   {

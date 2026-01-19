@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Search, Mail, Bell, ChevronDown, Menu, LogOut } from 'lucide-react';
+import { Search, Mail, Bell, ChevronDown, Menu, LogOut, User as UserIcon } from 'lucide-react';
 import { adminAuthService, User } from '@/lib/services/authService';
 import Link from 'next/link';
 
@@ -116,6 +116,13 @@ export default function AdminHeader() {
                       {currentUser.role === 'admin' ? 'ADMIN' : 'USER'}
                     </span>
                   </div>
+                  <Link
+                    href="/user/profile"
+                    className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors flex items-center gap-2"
+                  >
+                    <UserIcon className="w-4 h-4" />
+                    Thông tin cá nhân
+                  </Link>
                   <button
                     onClick={handleLogout}
                     className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2"
